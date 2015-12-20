@@ -1,0 +1,8 @@
+{
+    "require": {
+        "slim/slim": "^3.0",
+        "tuupola/slim-jwt-auth": "^2.0",
+        "lcobucci/jwt": "^3.1",
+        "tuupola/slim-basic-auth": "^2.0"
+    }
+}
