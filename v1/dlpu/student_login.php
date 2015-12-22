@@ -12,11 +12,11 @@
  */
 class student_login {
     /**
-     * @var $url string 系统登录页面地址
+     * @var $login_url string 系统登录页面地址
      * @var $username string 学生登陆名(这里是学号)
      * @var $password string 学生登陆密码
      */
-    public $url = 'http://210.30.62.8:8080/jsxsd/';
+    public $login_url = 'http://210.30.62.8:8080/jsxsd/';
     public $username = '';
     public $password = '';
 
@@ -36,7 +36,7 @@ class student_login {
     {
         $isSuccess = FALSE;
         $post_data = "USERNAME=$this->username&PASSWORD=$this->password";
-        $res_data = $this->login($this->url, $post_data);
+        $res_data = $this->login($this->login_url, $post_data);
         preg_match('/Location:\s(.*?)\sContent/', $res_data, $matches);
         (count($matches) == 2) ? ($isSuccess = TRUE) : ($isSuccess = FALSE);
         return $isSuccess;
@@ -52,7 +52,7 @@ class student_login {
     public function getCookie()
     {
         $post_data = "USERNAME=$this->username&PASSWORD=$this->password";
-        $res_data = $this->login($this->url, $post_data);
+        $res_data = $this->login($this->login_url, $post_data);
         $cookie = $this->reCookie($res_data);
         return $cookie;
     }
@@ -68,7 +68,7 @@ class student_login {
     public function getLocation()
     {
         $post_data = "USERNAME=$this->username&PASSWORD=$this->password";
-        $res_data = $this->login($this->url, $post_data);
+        $res_data = $this->login($this->login_url, $post_data);
         $location = $this->reLocation($res_data);
         return $location;
     }
@@ -96,7 +96,7 @@ class student_login {
      */
     private function myCurl($url, $post_data)
     {
-        $headers = array('Content-Length:'.strlen($post_data), 'Referer:'.$this->url, 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36');
+        $headers = array('Content-Length:'.strlen($post_data), 'Referer:'.$this->login_url, 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36');
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

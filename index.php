@@ -32,6 +32,17 @@ $app->add(new HttpBasicAuthentication([
     ]
 ]));
 
+
+/**
+ * root directory
+ **/
+$app->any('/', function (ServerRequestInterface $request, ResponseInterface $response, $arguments) {
+    require_once 'v1/root.php';
+    $response->getBody()->write(root::messages());
+    return $response;
+});
+
+
 /**
  * 获取授权token V1
  * ===============================================
@@ -69,16 +80,6 @@ $app->get("/v1/token", function(ServerRequestInterface $request, ResponseInterfa
 
 
 /**
- * root directory
-**/
-$app->any('/', function (ServerRequestInterface $request, ResponseInterface $response, $arguments) {
-    require_once 'v1/root.php';
-    $response->getBody()->write(root::messages());
-    return $response;
-});
-
-
-/**
  * 获取大学英语四六级成绩 V1
  * ===============================================
  * GET                   /v1/cet_score/{name}/{numbers}
@@ -111,62 +112,34 @@ $app->get('/v1/cet_score/{name}/{numbers}', function (ServerRequestInterface $re
  * {access_token}       授权token
  * {password}           username的登陆密码
  */
-$app->get('/v1/dlpu/userinfo/{username}', function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
+$app->get('/v1/dlpu/userinfo/{username}', function(ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
     if(!in_array('read', $app->jwt->scope)) return $response->withStatus(401);
-    if(is_null($request->getHeaderLine('password'))) return $response->withStatus(401);
 
-    require_once 'v1/dlpu/student_login.php';
-    $student_login = new student_login($arguments['username'], $request->getHeaderLine('password'));
-    if($student_login->isSuccess()) {
-        $student_login_cookie = $student_login->getCookie();
-        require_once 'v1/dlpu/student_information.php';
-        $student_information = new student_information($student_login_cookie);
-        $userinfo = $student_information->getInfo();
-
-        $response->getBody()->write(json_encode(['messages' => 'OK', 'data' => $userinfo]));
-        $response = $response->withHeader('Content-type', 'application/json');
-        return $response;
-    }else{
-        $response->getBody()->write(json_encode(['messages' => 'wrong student_id or password', 'data' => NULL]));
-        $response = $response->withHeader('Content-type', 'application/json');
-        return $response;
-    }
+    require_once 'v1/dlpu/slim_handle.php';
+    return (new slim_handle($request, $response, $arguments))->userinfo();
 });
 
 
 /**
  * 获取大连工业大学学生成绩 V1
  * ===============================================
- * GET                   /v1/dlpu/usergrade/{username}
+ * GET                   /v1/dlpu/usergrade/{username}/[{kksj}]
  *
  * HEADERS
  *      Authorization    Bearer {access_token}
  *      password         {password}
  * ===============================================
  * {username}           登陆账号, 这里为学号
+ * {kksj}               可选项 开课时间 即查询某学期的成绩 默认为空查询所有学期 查询格式为 2014-2015-2(2014-2015学年第二学期)
  * {access_token}       授权token
  * {password}           username的登陆密码
  */
-$app->get('/v1/dlpu/usergrade/{username}', function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
+$app->get('/v1/dlpu/usergrade/{username}/[{kksj}]', function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
     if(!in_array('read', $app->jwt->scope)) return $response->withStatus(401);
-    if(is_null($request->getHeaderLine('password'))) return $response->withStatus(401);
 
-    require_once 'v1/dlpu/student_login.php';
-    $student_login = new student_login($arguments['username'], $request->getHeaderLine('password'));
-    if($student_login->isSuccess()) {
-        $student_login_cookie = $student_login->getCookie();
-        require_once 'v1/dlpu/student_grade.php';
-        $student_grade = new student_grade($student_login_cookie);
-        $usergrade = $student_grade->getGrade();
-
-        $response->getBody()->write(json_encode(['messages' => 'OK', 'data' => $usergrade]));
-        $response = $response->withHeader('Content-type', 'application/json');
-        return $response;
-    }else{
-        $response->getBody()->write(json_encode(['messages' => 'wrong student_id or password', 'data' => NULL]));
-        $response = $response->withHeader('Content-type', 'application/json');
-        return $response;
-    }
+    require_once 'v1/dlpu/slim_handle.php';
+    return (new slim_handle($request, $response, $arguments))->usergrade();
 });
+
 
 $app->run();
