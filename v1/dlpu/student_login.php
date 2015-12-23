@@ -5,21 +5,25 @@
  * Date: 2015/12/21
  * Time: 14:38
  */
+include_once 'student_crawl_tools.php';
 
 /**
  * Class student_login
  * 学生登陆
  */
-class student_login {
+class student_login extends student_crawl_tools {
+
     /**
-     * @var $login_url string 系统登录页面地址
      * @var $username string 学生登陆名(这里是学号)
      * @var $password string 学生登陆密码
      */
-    public $login_url = 'http://210.30.62.8:8080/jsxsd/';
-    public $username = '';
-    public $password = '';
+    private $username = '';
+    private $password = '';
 
+
+    /**
+     * student_login constructor.
+     */
     public function __construct($username, $password)
     {
         $this->username = $username;
@@ -36,7 +40,7 @@ class student_login {
     {
         $isSuccess = FALSE;
         $post_data = "USERNAME=$this->username&PASSWORD=$this->password";
-        $res_data = $this->login($this->login_url, $post_data);
+        $res_data = $this->login($this->url_login, $post_data);
         preg_match('/Location:\s(.*?)\sContent/', $res_data, $matches);
         (count($matches) == 2) ? ($isSuccess = TRUE) : ($isSuccess = FALSE);
         return $isSuccess;
@@ -52,7 +56,7 @@ class student_login {
     public function getCookie()
     {
         $post_data = "USERNAME=$this->username&PASSWORD=$this->password";
-        $res_data = $this->login($this->login_url, $post_data);
+        $res_data = $this->login($this->url_login, $post_data);
         $cookie = $this->reCookie($res_data);
         return $cookie;
     }
@@ -68,7 +72,7 @@ class student_login {
     public function getLocation()
     {
         $post_data = "USERNAME=$this->username&PASSWORD=$this->password";
-        $res_data = $this->login($this->login_url, $post_data);
+        $res_data = $this->login($this->url_login, $post_data);
         $location = $this->reLocation($res_data);
         return $location;
     }
@@ -94,9 +98,9 @@ class student_login {
      * @param $post_data string 发送的数据
      * @return mixed 服务器response 网页源代码
      */
-    private function myCurl($url, $post_data)
+    protected function myCurl($url, $post_data)
     {
-        $headers = array('Content-Length:'.strlen($post_data), 'Referer:'.$this->login_url, 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36');
+        $headers = array('Content-Length:'.strlen($post_data), 'Referer:'.$this->url_login, 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36');
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

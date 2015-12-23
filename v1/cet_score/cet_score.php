@@ -89,9 +89,16 @@ class cet_score{
         $url = self::getUrl($args['numbers'], $args['name']);
         $webPage = self::getWebPage($url);
         $arrayData = self::getArrayData($webPage);
-        $result = self::getJsonData($arrayData);
+        //$result = self::getJsonData($arrayData);
 
-        $response->getBody()->write($result);
+        if(isset($arrayData)){
+            $response->getBody()->write(json_encode(['messages' => 'success', 'data' => ['content' => $arrayData]]));
+            $response = $response->withStatus(200);
+        } else {
+            $response->getBody()->write(json_encode(['error' => 'INVALID REQUEST']));
+            $response = $response->withStatus(400);
+        }
+
         $response = $response->withHeader('Content-type', 'application/json');
         return $response;
     }
