@@ -184,7 +184,7 @@ $app->get('/v1/dlpu/usergrade/{username}/[{kksj}]', function (ServerRequestInter
  * {access_token}       授权token
  * {password}           username的登陆密码
  */
-$app->get('/v1/dlpu/announcement/{username}', function(ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
+$app->get('/v1/dlpu/announcement/{username}', function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
     if(!in_array('read', $app->jwt->scope)) {
         $response->getBody()->write(json_encode(['error' => 'Permission denied']));
         $response = $response->withStatus(403);
@@ -192,9 +192,23 @@ $app->get('/v1/dlpu/announcement/{username}', function(ServerRequestInterface $r
         return $response;
     }
 
-    require_once 'v1/dlpu/slim_handle.php';;
+    require_once 'v1/dlpu/slim_handle.php';
     return (new slim_handle($request, $response, $arguments))->announcement();
 });
+
+
+$app->get('/v1/dlpu/curriculum_theory/{username}/{semester}/{weeks}', function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
+    if(!in_array('read', $app->jwt->scope)) {
+        $response->getBody()->write(json_encode(['error' => 'Permission denied']));
+        $response = $response->withStatus(403);
+        $response = $response->withHeader('Content-type', 'application/json');
+        return $response;
+    }
+
+    require_once 'v1/dlpu/slim_handle.php';
+    return (new slim_handle($request, $response, $arguments))->curriculum_theory();
+});
+
 
 
 $app->run();

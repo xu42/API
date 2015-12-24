@@ -12,13 +12,20 @@ class student_crawl_tools {
      * @var  $url_login string      系统登录页面地址
      * @var $cookie string          已成功登陆的用户的cookie信息
      */
-    protected $url_host = 'http://210.30.62.8:8080';
-    protected $url_login = 'http://210.30.62.8:8080/jsxsd/';
-    protected $url = '';
-    protected $url_student_grade = 'kscj/cjcx_list';
-    protected $url_student_information = 'grxx/xsxx';
-    protected $url_student_announcement = 'ggly/ysgg_query';
+    protected $url_host                             = 'http://210.30.62.8:8080';
+    protected $url_login                            = 'http://210.30.62.8:8080/jsxsd/';
+    protected $url                                  = '';
+    protected $url_student_grade                    = 'kscj/cjcx_list';
+    protected $url_student_information              = 'grxx/xsxx';
+    protected $url_student_announcement             = 'ggly/ysgg_query';
+    protected $url_student_curriculum_theory        = 'xskb/xskb_list.do';
+    protected $url_student_curriculum_experiment    = 'syjx/toXskb.do';
+    protected $url_student_curriculum_class         = 'kbcx/kbxx_xzb';
+    protected $url_student_curriculum_teather       = 'kbcx/kbxx_teacher';
+    protected $url_student_curriculum_classroom     = 'kbcx/kbxx_classroom';
+    protected $url_student_curriculum_course        = 'kbcx/kbxx_kc';
     protected $cookie = '';
+    protected $postdata = '';
 
     /**
      * student_learning_record_card constructor.
@@ -43,18 +50,17 @@ class student_crawl_tools {
      * 一个简单的封装CURL网络请求的函数
      * @param $url 请求地址
      * @param $cookie 发送的Cookie
-     * @param $post_data 发送的数据
      * @return mixed 服务器响应 网页源代码
      */
-    protected function myCurl($url, $cookie, $post_data = '')
+    protected function myCurl($url, $cookie, $postdata = '')
     {
-        $headers = array('Content-Length:'.strlen($post_data), 'Referer:'.$this->url_login, 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36');
+        $headers = array('Content-Length:'.strlen($postdata), 'Referer:'.$this->url_login, 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36');
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_COOKIE, $cookie);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
         curl_setopt($ch,CURLOPT_HTTPHEADER, $headers);
         $res_data = curl_exec($ch);
         return $res_data;

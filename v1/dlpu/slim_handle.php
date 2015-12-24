@@ -138,4 +138,23 @@ class slim_handle {
 
     }
 
+    /**
+     * @return mixed 我的课表->学期理论课表
+     */
+    public function curriculum_theory()
+    {
+        if(is_null($this->request->getHeaderLine('password'))) return $this->noPassword();
+
+        if($this->isLoginSuccess()) {
+            require_once 'student_curriculum.php';
+            $student_curriculum = new student_curriculum($this->getCookie());
+            $curriculum_theory = $student_curriculum->curriculum_theory($this->arguments['semester'], $this->arguments['weeks']);
+            return $this->writeResponseBody($curriculum_theory);
+        }else{
+            return $this->wrongPassword();
+        }
+
+
+    }
+
 }
