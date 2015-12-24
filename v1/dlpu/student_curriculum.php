@@ -7,8 +7,11 @@
  */
 include_once 'student_crawl_tools.php';
 
+/**
+ * Class student_curriculum
+ * 课表查询
+ */
 class student_curriculum extends student_crawl_tools {
-
 
     /**
      * student_curriculum constructor.
@@ -16,12 +19,6 @@ class student_curriculum extends student_crawl_tools {
     public function __construct($cookie)
     {
         parent::__construct($cookie);
-//        $this->url = $this->url_login . $this->url_student_curriculum_theory;
-//        $this->url = $this->url_login . $this->url_student_curriculum_experiment;
-//        $this->url = $this->url_login . $this->url_student_curriculum_class;
-//        $this->url = $this->url_login . $this->url_student_curriculum_teather;
-//        $this->url = $this->url_login . $this->url_student_curriculum_classroom;
-//        $this->url = $this->url_login . $this->url_student_curriculum_course;
     }
 
     /**

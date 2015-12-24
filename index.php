@@ -197,6 +197,21 @@ $app->get('/v1/dlpu/announcement/{username}', function (ServerRequestInterface $
 });
 
 
+/**
+ * 获取学期理论课表信息
+ * ===============================================
+ * GET                   /v1/dlpu/curriculum_theory/{username}/{semester}/{weeks}
+ *
+ * HEADERS
+ *      Authorization    Bearer {access_token}
+ *      password         {password}
+ * ===============================================
+ * {username}           登陆账号, 这里为学号
+ * {semester}           学期, eg. 2015-2016-1
+ * {weeks}              周次, eg. 12
+ * {access_token}       授权token
+ * {password}           username的登陆密码
+ */
 $app->get('/v1/dlpu/curriculum_theory/{username}/{semester}/{weeks}', function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
     if(!in_array('read', $app->jwt->scope)) {
         $response->getBody()->write(json_encode(['error' => 'Permission denied']));
@@ -208,6 +223,91 @@ $app->get('/v1/dlpu/curriculum_theory/{username}/{semester}/{weeks}', function (
     require_once 'v1/dlpu/slim_handle.php';
     return (new slim_handle($request, $response, $arguments))->curriculum_theory();
 });
+
+
+/**
+ * 获取考试安排信息
+ * ===============================================
+ * GET                   /v1/dlpu/exam_arrangement/{username}/{semester}/{category}
+ *
+ * HEADERS
+ *      Authorization    Bearer {access_token}
+ *      password         {password}
+ * ===============================================
+ * {username}           登陆账号, 这里为学号
+ * {semester}           学年学期, eg. 2015-2016-1
+ * {category}           考试类别，1 => 期初, 2 => 期中, 3 => 期末
+ * {access_token}       授权token
+ * {password}           username的登陆密码
+ */
+$app->get('/v1/dlpu/exam_arrangement/{username}/{semester}/{category}', function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
+    if(!in_array('read', $app->jwt->scope)) {
+        $response->getBody()->write(json_encode(['error' => 'Permission denied']));
+        $response = $response->withStatus(403);
+        $response = $response->withHeader('Content-type', 'application/json');
+        return $response;
+    }
+
+    require_once 'v1/dlpu/slim_handle.php';
+    return (new slim_handle($request, $response, $arguments))->exam_arrangement();
+});
+
+
+/**
+ * 修改密码 (现不能判断更改是否成功)
+ * ===============================================
+ * POST                   /v1/dlpu/change_password/{username}
+ *
+ * HEADERS
+ *      Authorization    Bearer {access_token}
+ *      password         {password}
+ *
+ * FORM-DATA
+ *      new_passwd      {new_passwd}
+ * ===============================================
+ * {username}           登陆账号, 这里为学号
+ * {access_token}       授权token
+ * {password}           username的登陆密码
+ */
+$app->post('/v1/dlpu/change_password/{username}', function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
+    if(!in_array('read', $app->jwt->scope)) {
+        $response->getBody()->write(json_encode(['error' => 'Permission denied']));
+        $response = $response->withStatus(403);
+        $response = $response->withHeader('Content-type', 'application/json');
+        return $response;
+    }
+
+    require_once 'v1/dlpu/slim_handle.php';
+    return (new slim_handle($request, $response, $arguments))->change_password();
+});
+
+
+/**
+ * 重置密码 (现不能判断重置是否成功)
+ * ===============================================
+ * POST                   /v1/dlpu/reset_password/
+ *
+ * HEADERS
+ *      Authorization    Bearer {access_token}
+ *
+ * FORM-DATA
+ *      {username}           学号
+ *      {id_card}            身份证号码
+ * ===============================================
+ * {access_token}       授权token
+ */
+$app->post('/v1/dlpu/reset_password', function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
+    if(!in_array('read', $app->jwt->scope)) {
+        $response->getBody()->write(json_encode(['error' => 'Permission denied']));
+        $response = $response->withStatus(403);
+        $response = $response->withHeader('Content-type', 'application/json');
+        return $response;
+    }
+
+    require_once 'v1/dlpu/slim_handle.php';
+    return (new slim_handle($request, $response, $arguments))->reset_password();
+});
+
 
 
 

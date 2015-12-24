@@ -22,9 +22,9 @@ class slim_handle {
      */
     public function __construct ($request, $response, $arguments)
     {
-        $this->request = $request;
-        $this->response = $response;
-        $this->arguments = $arguments;
+        $this->request      = $request;
+        $this->response     = $response;
+        $this->arguments    = $arguments;
     }
 
 
@@ -141,7 +141,7 @@ class slim_handle {
     /**
      * @return mixed 我的课表->学期理论课表
      */
-    public function curriculum_theory()
+    public function curriculum_theory ()
     {
         if(is_null($this->request->getHeaderLine('password'))) return $this->noPassword();
 
@@ -153,8 +153,54 @@ class slim_handle {
         }else{
             return $this->wrongPassword();
         }
+    }
+
+    /**
+     * @return mixed 考试安排信息
+     */
+    public function exam_arrangement ()
+    {
+        if(is_null($this->request->getHeaderLine('password'))) return $this->noPassword();
+
+        if($this->isLoginSuccess()) {
+            require_once 'student_exam_arrangement.php';
+            $student_curriculum = new student_exam_arrangement($this->getCookie());
+            $exam_arrangement = $student_curriculum->get($this->arguments['semester'], $this->arguments['category']);
+            return $this->writeResponseBody($exam_arrangement);
+        }else{
+            return $this->wrongPassword();
+        }
+    }
+
+    /**
+     * @return mixed 修改密码
+     */
+    public function change_password ()
+    {
+        if(is_null($this->request->getHeaderLine('password'))) return $this->noPassword();
+
+        if($this->isLoginSuccess()) {
+            require_once 'student_change_password.php';
+            $change_password = new student_change_password($this->getCookie());
+            $allPostPutVars = $this->request->getParsedBody();
+            $res = $change_password->set($this->request->getHeaderLine('password'), $allPostPutVars['new_passwd']);
+            return $this->writeResponseBody($res);
+        }else{
+            return $this->wrongPassword();
+        }
+    }
 
 
+    /**
+     * @return mixed 重置密码
+     */
+    public function reset_password ()
+    {
+        require_once 'student_reset_password.php';
+        $reset_password = new student_reset_password();
+        $allPostPutVars = $this->request->getParsedBody();
+        $res = $reset_password->set($allPostPutVars['username'], $allPostPutVars['id_card']);
+        return $this->writeResponseBody($res);
     }
 
 }

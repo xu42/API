@@ -8,9 +8,23 @@
 class student_crawl_tools {
 
     /**
-     * @var  $url_host string       教务处学生系统的HOST 加端口号(可以是域名)
-     * @var  $url_login string      系统登录页面地址
-     * @var $cookie string          已成功登陆的用户的cookie信息
+     * @var  $url_host                              string      教务处学生系统的HOST 加端口号(可以是域名)
+     * @var  $url_login                             string      系统登录页面地址
+     * @var  $url                                   string      myCurl 形参, 有继承者继承此变量, 请求资源的网络地址
+     * @var  $url_student_grade                     string      相对url_host的地址   考试成绩查询
+     * @var  $url_student_information               string      相对url_host的地址   学生信息(学籍卡片)
+     * @var  $url_student_announcement              string      相对url_host的地址   学生已收公告信息
+     * @var  $url_student_curriculum_theory         string      相对url_host的地址   学期理论课表
+     * @var  $url_student_curriculum_experiment     string      相对url_host的地址   实验课表
+     * @var  $url_student_curriculum_class          string      相对url_host的地址   班级课表
+     * @var  $url_student_curriculum_teather        string      相对url_host的地址   教师课表
+     * @var  $url_student_curriculum_classroom      string      相对url_host的地址   教室课表
+     * @var  $url_student_curriculum_course         string      相对url_host的地址   课程课表
+     * @var  $url_student_exam_arrangement          string      相对url_host的地址   考试安排
+     * @var  $url_student_change_password           string      相对url_host的地址   修改密码
+     * @var  $url_student_reset_password            string      相对url_host的地址   重置密码
+     * @var $cookie                                 string      myCurl 形参, 有继承者继承此变量, 已成功登陆的用户的cookie信息
+     * @var $postdata                               string      myCurl 形参, 有继承者继承此变量, 以 POST 方式请求资源的需要POST的数据
      */
     protected $url_host                             = 'http://210.30.62.8:8080';
     protected $url_login                            = 'http://210.30.62.8:8080/jsxsd/';
@@ -24,8 +38,11 @@ class student_crawl_tools {
     protected $url_student_curriculum_teather       = 'kbcx/kbxx_teacher';
     protected $url_student_curriculum_classroom     = 'kbcx/kbxx_classroom';
     protected $url_student_curriculum_course        = 'kbcx/kbxx_kc';
-    protected $cookie = '';
-    protected $postdata = '';
+    protected $url_student_exam_arrangement         = 'xsks/xsksap_list';
+    protected $url_student_change_password          = 'grsz/grsz_xgmm';
+    protected $url_student_reset_password           = 'system/resetPasswd';
+    protected $cookie                               = '';
+    protected $postdata                             = '';
 
     /**
      * student_learning_record_card constructor.
