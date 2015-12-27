@@ -7,8 +7,15 @@ use Psr\Http\Message\ResponseInterface;
 use Slim\Middleware\HttpBasicAuthentication;
 use Slim\Middleware\JwtAuthentication;
 use Lcobucci\JWT\Builder;
+use Lcobucci\JWT\Signer\Hmac\Sha256;
 
-$app = new \Slim\App;
+$configuration = [
+    'settings' => [
+        'displayErrorDetails' => true,
+    ],
+];
+$c = new \Slim\Container($configuration);
+$app = new \Slim\App($c);
 
 
 $app->add(new JwtAuthentication([
@@ -82,10 +89,10 @@ $app->get("/v1/token", function(ServerRequestInterface $request, ResponseInterfa
         ->setAudience('https://api.xu42.cn') // Configures the audience (aud claim)
         ->setId($request->getHeaderLine('key'), true) // Configures the id (jti claim), replicating as a header item
         ->setIssuedAt(time()) // Configures the time that the token was issue (iat claim)
-        ->setNotBefore(time()+60) // Configures the time that the token can be used (nbf claim)
+        ->setNotBefore(time()) // Configures the time that the token can be used (nbf claim)
         ->setExpiration(time()+3600) // Configures the expiration time of the token (exp claim)
         ->set('scope', ['read']) // Configures a new claim, called "scope"
-        ->sign(new \Lcobucci\JWT\Signer\Hmac\Sha256(), 'cn.xu42.api') // ALGORITHM HS256
+        ->sign(new Sha256(), 'cn.xu42.api') // ALGORITHM HS256
         ->getToken(); // Retrieves the generated token
     $response->getBody()->write(json_encode(['access_token' => (string) $access_token, 'token_type' => 'Bearer', 'expires_in' => $access_token->getClaim('exp') - $access_token->getClaim('iat')]));
     $response = $response->withStatus(200);
@@ -307,8 +314,6 @@ $app->post('/v1/dlpu/reset_password', function (ServerRequestInterface $request,
     require_once 'v1/dlpu/slim_handle.php';
     return (new slim_handle($request, $response, $arguments))->reset_password();
 });
-
-
 
 
 $app->run();

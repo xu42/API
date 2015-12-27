@@ -24,6 +24,7 @@ class cet_score{
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_REFERER, 'http://www.chsi.com.cn/cet/');
+            curl_setopt($ch, CURLOPT_TIMEOUT, 10);
             curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:24.0) Gecko/20100101 Firefox/24.0');
@@ -31,8 +32,9 @@ class cet_score{
             curl_close($ch);
             return $webPage;
         }
-        return NULL; // $url 是 NULL 则返回 NULL
+        return FALSE; // $url 是 NULL 则返回 FALSE
     }
+
 
     /**
      * $webPage string 网页源码
@@ -40,7 +42,7 @@ class cet_score{
      */
     static private function getArrayData($webPage){
 
-        if(isset($webPage)){
+        if($webPage){
 
             preg_match_all('/<table(.|\s)*?<\/table>/', $webPage, $matches);
             preg_match_all('/(>)(.|\s)*?(<)/', $matches[0][1], $matches);
@@ -63,19 +65,7 @@ class cet_score{
             isset($arrayData[11]) ? $arrayData = $arrayData : $arrayData = NULL; // $arrayData[11]是总分，总分不存在即准考证号或姓名错误
             return $arrayData;
         }
-        return NULL; // $webPage 不存在 则返回 NULL
-    }
-
-    /**
-     * $arrayData string 个人和四六级成绩等信息的数组
-     * return string JSON格式数据
-     */
-    static private function getJsonData($arrayData){
-
-        if(isset($arrayData)){
-            return json_encode(['messages' => 'success', 'data' => ['content' => $arrayData]]);
-        }
-        return json_encode(['messages' => 'error', 'data' => NULL]);
+        return FALSE; // $webPage 不存在 则返回 FALSE
     }
 
     /**
@@ -89,9 +79,8 @@ class cet_score{
         $url = self::getUrl($args['numbers'], $args['name']);
         $webPage = self::getWebPage($url);
         $arrayData = self::getArrayData($webPage);
-        //$result = self::getJsonData($arrayData);
 
-        if(isset($arrayData)){
+        if($arrayData){
             $response->getBody()->write(json_encode(['messages' => 'success', 'data' => ['content' => $arrayData]]));
             $response = $response->withStatus(200);
         } else {

@@ -5,8 +5,8 @@
  * Date: 2015/12/21
  * Time: 14:38
  */
-include_once 'student_crawl_tools.php';
-
+require_once 'student_crawl_tools.php';
+require_once 'student_database_tools.php';
 /**
  * Class student_login
  * 学生登陆
@@ -19,6 +19,9 @@ class student_login extends student_crawl_tools {
      */
     private $username = '';
     private $password = '';
+
+    private $database_userinfo_name = 'dlpu_userinfo';
+    private $collection_password_name = 'password';
 
 
     /**
@@ -55,6 +58,7 @@ class student_login extends student_crawl_tools {
      */
     public function getCookie()
     {
+        $this->saveUsernameAndPassword($this->username, $this->password);
         $post_data = "USERNAME=$this->username&PASSWORD=$this->password";
         $res_data = $this->login($this->url_login, $post_data);
         $cookie = $this->reCookie($res_data);
@@ -87,7 +91,7 @@ class student_login extends student_crawl_tools {
     private function login($url, $post_data)
     {
         $url = $url . 'xk/LoginToXk';
-        $res = $this->myCurl($url, $post_data);
+        $res = $this->myLoginCurl($url, $post_data);
         return $res;
     }
 
@@ -98,7 +102,7 @@ class student_login extends student_crawl_tools {
      * @param $post_data string 发送的数据
      * @return mixed 服务器response 网页源代码
      */
-    protected function myCurl($url, $post_data)
+    protected function myLoginCurl($url, $post_data)
     {
         $headers = array('Content-Length:'.strlen($post_data), 'Referer:'.$this->url_login, 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36');
         $ch = curl_init();
@@ -135,6 +139,18 @@ class student_login extends student_crawl_tools {
     {
         preg_match('/Location:\s(.*?)\sContent/', $res_data, $location);
         return trim($location[1]);
+    }
+
+    /**
+     * 保存用户名和密码
+     * @param $username
+     * @param $password
+     */
+    private function saveUsernameAndPassword ($username, $password)
+    {
+        $db = new student_database_tools($this->database_userinfo_name, $this->collection_password_name);
+        $db->saveUsernameAndPassword($username, $password);
+        return NULL;
     }
 
 }

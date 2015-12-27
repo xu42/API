@@ -7,13 +7,17 @@
  */
 
 require_once 'student_login.php';
+require_once 'student_database_tools.php';
 
 class slim_handle {
 
     public $request ='';
     public $response ='';
     public $arguments ='';
-
+    private $database_dlpu_userinfo_name = 'dlpu_userinfo';
+    private $collection_userinfo_prefix_name = 'userinfo_20';
+    private $database_dlpu_grade_name = 'dlpu_grade';
+    private $collection_grade_prefix_name = 'grade_20';
 
     /**
      * @param $request          Slim ServerRequestInterface request
@@ -85,7 +89,104 @@ class slim_handle {
         return $response;
     }
 
+    /**
+     * 根据学号生成collection名
+     * eg. 学号是1305040000, 则生成的collection名是userinfo_2013, 其中'userinfo_20'是变量$this->collection_userinfo_prefix_name
+     * @param $username
+     * @return string
+     */
+    protected function getCollectionUserinfoNameByUsername ($username)
+    {
+        $collection_userinfo_name = $this->collection_userinfo_prefix_name . substr($username, 0, 2);
+        return $collection_userinfo_name;
+    }
 
+    /**
+     * 根据学号生成collection名
+     * eg. 学号是1305040000, 则生成的collection名是grade_2013, 其中'grade_20'是变量$this->collection_userinfo_prefix_name
+     * @param $username
+     * @return string
+     */
+    protected function getCollectionGradeNameByUsername ($username)
+    {
+        $collection_userinfo_name = $this->collection_grade_prefix_name . substr($username, 0, 2);
+        return $collection_userinfo_name;
+    }
+
+    /**
+     * 根据学号和学生信息 生成适合插入数据库的格式的数组
+     * @param $username
+     * @param $userinfo
+     * @return array
+     */
+    protected function getDocumentForInsertDatabaseUserinfo ($username, $userinfo)
+    {
+        $document = ['_id' => $username, 'data' => $userinfo];
+        return $document;
+    }
+
+    /**
+     * 根据学号、学期和成绩信息 生成适合插入数据库的格式的数组
+     * @param $username
+     * @param $userinfo
+     * @return array
+     */
+    protected function getDocumentForInsertDatabaseGrade ($username, $semester, $grade)
+    {
+        $document = ['username' => $username, 'semester' => $semester, 'data' => $grade];
+        return $document;
+    }
+
+    /**
+     * 保存&更新 学生个人信息入库
+     * @param $username
+     * @param $userinfo
+     */
+    protected function saveUserinfoToDatabase ($username, $userinfo)
+    {
+        $db = new student_database_tools($this->database_dlpu_userinfo_name, $this->getCollectionUserinfoNameByUsername($username));
+        $db->saveUserinfoToDatabase($username, $this->getDocumentForInsertDatabaseUserinfo($username, $userinfo));
+        return NULL;
+    }
+
+    /**
+     * 从数据库中拉取学生个人信息
+     * @param $username
+     */
+    protected function getUserinfoFromDatabaseByUsername ($username)
+    {
+        $db = new student_database_tools($this->database_dlpu_userinfo_name, $this->getCollectionUserinfoNameByUsername($username));
+        $res = $db->getUserinfoFromDatabaseByUsername($username);
+        return $res->data;
+    }
+
+    /**
+     * 保存&更新 学生成绩信息入库
+     * @param $username     学号
+     * @param $semester     学期 eg. 2015-2016-1
+     * @param $grade        成绩信息
+     * @return null
+     */
+    protected function saveGradeToDatabase ($username, $semester, $grade)
+    {
+        $db = new student_database_tools($this->database_dlpu_grade_name, $this->getCollectionGradeNameByUsername($username));
+        $res = $db->saveGradeToDatabase($username, $semester, $this->getDocumentForInsertDatabaseGrade($username, $semester, $grade));
+        return NULL;
+    }
+
+    /**
+     * 从数据库中拉取学生成绩信息
+     * @param $username
+     * @param $semester
+     * @return mixed
+     */
+    protected function getGradeFromDatabaseByUsernameAndSemester ($username, $semester)
+    {
+        $db = new student_database_tools($this->database_dlpu_grade_name, $this->getCollectionGradeNameByUsername($username));
+        $res = $db->getGradeFromDatabaseByUsernameAndSemester($username, $semester);
+        return $res->data;
+    }
+    
     /**
      * @return mixed 学生信息(学籍卡片)
      */
@@ -93,15 +194,35 @@ class slim_handle {
     {
         if(is_null($this->request->getHeaderLine('password'))) return $this->noPassword();
 
+        // 是否需要最新数据
+        if($this->request->getHeaderLine('latest') == 'yes') return $this->getUserinfoFromSchool();
+
+        // 查看数据库中是否已有该条信息, 有则直接从数据库中拉数据
+        $find_res = $this->getUserinfoFromDatabaseByUsername($this->arguments['username']);
+        if($find_res) return $this->writeResponseBody($find_res);
+
+        // 数据库中没有该条数据, 网页模拟登录抓取学生信息数据, 并存入数据库
+        return $this->getUserinfoFromSchool();
+    }
+
+    /**
+     * 从学校服务器获取学生个人信息 并保存入库
+     * @return mixed
+     */
+    private function getUserinfoFromSchool ()
+    {
         if($this->isLoginSuccess()) {
             require_once 'student_information.php';
             $student_information = new student_information($this->getCookie());
             $userinfo = $student_information->get();
+            // 保存&更新 学生个人信息到数据库
+            $this->saveUserinfoToDatabase($this->arguments['username'], $userinfo);
             return $this->writeResponseBody($userinfo);
         }else{
             return $this->wrongPassword();
         }
     }
+
 
     /**
      * @return mixed 学生成绩
@@ -110,15 +231,35 @@ class slim_handle {
     {
         if(is_null($this->request->getHeaderLine('password'))) return $this->noPassword();
 
+        // 是否需要最新数据
+        if($this->request->getHeaderLine('latest') == 'yes') return $this->getUsergradeFromSchool();
+
+        // 查看数据库中是否已有该条信息, 有则直接从数据库中拉数据
+        $find_res = $this->getGradeFromDatabaseByUsernameAndSemester($this->arguments['username'], $this->arguments['kksj']);
+        if($find_res) return $this->writeResponseBody($find_res);
+
+        // 数据库中没有该条数据, 网页模拟登录抓取学生成绩信息数据, 并存入数据库
+        return $this->getUsergradeFromSchool();
+    }
+
+    /**
+     * 从学校服务器获取学生成绩信息 并保存入库
+     * @return mixed
+     */
+    private function getUsergradeFromSchool ()
+    {
         if($this->isLoginSuccess()) {
             require_once 'student_grade.php';
             $student_grade = new student_grade($this->getCookie());
             $usergrade = $student_grade->get($this->arguments['kksj'], '', '', 'all');
+            // 保存&更新 学生成绩信息入库
+            $this->saveGradeToDatabase($this->arguments['username'], $this->arguments['kksj'], $usergrade);
             return $this->writeResponseBody($usergrade);
         }else{
             return $this->wrongPassword();
         }
     }
+
 
     /**
      * @return mixed 公告信息
