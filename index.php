@@ -134,6 +134,7 @@ $app->get('/v1/cet_score/{name}/{numbers}', function (ServerRequestInterface $re
  * HEADERS
  *      Authorization    Bearer {access_token}
  *      password         {password}
+ *      wechat_id        {wechat_id}
  * ===============================================
  * {username}           登陆账号, 这里为学号
  * {access_token}       授权token
@@ -160,6 +161,7 @@ $app->get('/v1/dlpu/userinfo/{username}', function(ServerRequestInterface $reque
  * HEADERS
  *      Authorization    Bearer {access_token}
  *      password         {password}
+ *      wechat_id        {wechat_id}
  * ===============================================
  * {username}           登陆账号, 这里为学号
  * {kksj}               可选项 开课时间 即查询某学期的成绩 默认为空查询所有学期 查询格式为 2014-2015-2(2014-2015学年第二学期)
@@ -186,10 +188,12 @@ $app->get('/v1/dlpu/usergrade/{username}/[{kksj}]', function (ServerRequestInter
  * HEADERS
  *      Authorization    Bearer {access_token}
  *      password         {password}
+ *      wechat_id        {wechat_id}
  * ===============================================
  * {username}           登陆账号, 这里为学号
  * {access_token}       授权token
  * {password}           username的登陆密码
+ * {wechat_id}          微信 openid
  */
 $app->get('/v1/dlpu/announcement/{username}', function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
     if(!in_array('read', $app->jwt->scope)) {
@@ -212,12 +216,14 @@ $app->get('/v1/dlpu/announcement/{username}', function (ServerRequestInterface $
  * HEADERS
  *      Authorization    Bearer {access_token}
  *      password         {password}
+ *      wechat_id        {wechat_id}
  * ===============================================
  * {username}           登陆账号, 这里为学号
  * {semester}           学期, eg. 2015-2016-1
  * {weeks}              周次, eg. 12
  * {access_token}       授权token
  * {password}           username的登陆密码
+ * {wechat_id}          微信 openid
  */
 $app->get('/v1/dlpu/curriculum_theory/{username}/{semester}/{weeks}', function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
     if(!in_array('read', $app->jwt->scope)) {
@@ -240,12 +246,14 @@ $app->get('/v1/dlpu/curriculum_theory/{username}/{semester}/{weeks}', function (
  * HEADERS
  *      Authorization    Bearer {access_token}
  *      password         {password}
+ *      wechat_id        {wechat_id}
  * ===============================================
  * {username}           登陆账号, 这里为学号
  * {semester}           学年学期, eg. 2015-2016-1
  * {category}           考试类别，1 => 期初, 2 => 期中, 3 => 期末
  * {access_token}       授权token
  * {password}           username的登陆密码
+ * {wechat_id}          微信 openid
  */
 $app->get('/v1/dlpu/exam_arrangement/{username}/{semester}/{category}', function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
     if(!in_array('read', $app->jwt->scope)) {
@@ -268,6 +276,7 @@ $app->get('/v1/dlpu/exam_arrangement/{username}/{semester}/{category}', function
  * HEADERS
  *      Authorization    Bearer {access_token}
  *      password         {password}
+ *      wechat_id        {wechat_id}
  *
  * FORM-DATA
  *      new_passwd      {new_passwd}
@@ -275,6 +284,7 @@ $app->get('/v1/dlpu/exam_arrangement/{username}/{semester}/{category}', function
  * {username}           登陆账号, 这里为学号
  * {access_token}       授权token
  * {password}           username的登陆密码
+ * {wechat_id}          微信 openid
  */
 $app->post('/v1/dlpu/change_password/{username}', function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
     if(!in_array('read', $app->jwt->scope)) {
@@ -296,12 +306,14 @@ $app->post('/v1/dlpu/change_password/{username}', function (ServerRequestInterfa
  *
  * HEADERS
  *      Authorization    Bearer {access_token}
+ *      wechat_id        {wechat_id}
  *
  * FORM-DATA
  *      {username}           学号
  *      {id_card}            身份证号码
  * ===============================================
  * {access_token}       授权token
+ * {wechat_id}          微信 openid
  */
 $app->post('/v1/dlpu/reset_password', function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
     if(!in_array('read', $app->jwt->scope)) {
@@ -315,5 +327,33 @@ $app->post('/v1/dlpu/reset_password', function (ServerRequestInterface $request,
     return (new slim_handle($request, $response, $arguments))->reset_password();
 });
 
+
+/**
+ * 保存学号和密码, 包括微信openid
+ * ===============================================
+ * POST                   /v1/dlpu/save
+ *
+ * HEADERS
+ *      Authorization    Bearer {access_token}
+ *      username         {username}
+ *      password         {password}
+ *      wechat_id        {wechat_id}
+ * ===============================================
+ * {access_token}       授权token
+ * {username}           用户名,学号
+ * {password}           密码
+ * {wechat_id}          微信 openid
+ */
+$app->post('/v1/dlpu/save', function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
+    if(!in_array('read', $app->jwt->scope)) {
+        $response->getBody()->write(json_encode(['error' => 'Permission denied']));
+        $response = $response->withStatus(403);
+        $response = $response->withHeader('Content-type', 'application/json');
+        return $response;
+    }
+
+    require_once 'v1/dlpu/slim_handle.php';
+    return (new slim_handle($request, $response, $arguments))->savePasswordToDatabase();
+});
 
 $app->run();

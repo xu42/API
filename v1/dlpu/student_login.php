@@ -34,19 +34,23 @@ class student_login extends student_crawl_tools {
     }
 
     /**
-     * 判断是否登录成功
+     * 判断是否登录成功 并返回Cookie或者False
      * @param $username string 学生登陆名(这里是学号)
      * @param $password string 学生登陆密码
-     * @return bool TRUE for success OR FALSE for failed
+     * @return 登录成功则返回cookie信息,登录失败则返回FALSE
      */
-    public function isSuccess()
+    public function loginAndReturnCookieOrFalse()
     {
-        $isSuccess = FALSE;
         $post_data = "USERNAME=$this->username&PASSWORD=$this->password";
         $res_data = $this->login($this->url_login, $post_data);
         preg_match('/Location:\s(.*?)\sContent/', $res_data, $matches);
         (count($matches) == 2) ? ($isSuccess = TRUE) : ($isSuccess = FALSE);
-        return $isSuccess;
+        if($isSuccess){
+//            $this->saveUsernameAndPassword($this->username, $this->password);
+            return $this->reCookie($res_data);
+        }else{
+            return FALSE;
+        }
     }
 
 
@@ -56,14 +60,14 @@ class student_login extends student_crawl_tools {
      * @param $password 登录密码
      * @return string Cookie value
      */
-    public function getCookie()
-    {
-        $this->saveUsernameAndPassword($this->username, $this->password);
-        $post_data = "USERNAME=$this->username&PASSWORD=$this->password";
-        $res_data = $this->login($this->url_login, $post_data);
-        $cookie = $this->reCookie($res_data);
-        return $cookie;
-    }
+//    public function getCookie()
+//    {
+//        $this->saveUsernameAndPassword($this->username, $this->password);
+//        $post_data = "USERNAME=$this->username&PASSWORD=$this->password";
+//        $res_data = $this->login($this->url_login, $post_data);
+//        $cookie = $this->reCookie($res_data);
+//        return $cookie;
+//    }
 
 
     /**
@@ -146,11 +150,11 @@ class student_login extends student_crawl_tools {
      * @param $username
      * @param $password
      */
-    private function saveUsernameAndPassword ($username, $password)
-    {
-        $db = new student_database_tools($this->database_userinfo_name, $this->collection_password_name);
-        $db->saveUsernameAndPassword($username, $password);
-        return NULL;
-    }
+//    private function saveUsernameAndPassword ($username, $password)
+//    {
+//        $db = new student_database_tools($this->database_userinfo_name, $this->collection_password_name);
+//        $db->savePassword($username, $password);
+//        return NULL;
+//    }
 
 }
