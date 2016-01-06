@@ -41,6 +41,7 @@ class student_crawl_tools {
     protected $url_student_exam_arrangement         = 'xsks/xsksap_list';
     protected $url_student_change_password          = 'grsz/grsz_xgmm';
     protected $url_student_reset_password           = 'system/resetPasswd';
+    protected $url_student_photo                    = 'grxx/xszpLoad';
     protected $cookie                               = '';
     protected $postdata                             = '';
 

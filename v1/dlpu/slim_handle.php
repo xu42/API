@@ -97,9 +97,9 @@ class slim_handle {
      */
     protected function loginAndReturnCookieOrFalse ()
     {
-        $password = $this->getPasswordFromDatabaseByWechatId($this->request->getHeaderLine('wechat_id'));
-        $student_login = new student_login($this->arguments['username'], $password);
-//        $student_login = new student_login($this->arguments['username'], $this->request->getHeaderLine('password'));
+//        $password = $this->getPasswordFromDatabaseByWechatId($this->request->getHeaderLine('wechat_id'));
+//        $student_login = new student_login($this->arguments['username'], $password);
+        $student_login = new student_login($this->arguments['username'], $this->request->getHeaderLine('password'));
         return $student_login->loginAndReturnCookieOrFalse();
     }
 

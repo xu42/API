@@ -23,7 +23,7 @@ $app->add(new JwtAuthentication([
     "rules" => [
         new JwtAuthentication\RequestPathRule([
             "path" => '/',
-            "passthrough" => ["/v1/token"]
+            "passthrough" => ["/v1/token","/wechat"]
         ])
     ],
     "callback" => function(ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
@@ -355,5 +355,19 @@ $app->post('/v1/dlpu/save', function (ServerRequestInterface $request, ResponseI
     require_once 'v1/dlpu/slim_handle.php';
     return (new slim_handle($request, $response, $arguments))->savePasswordToDatabase();
 });
+
+
+$app->get('/v1/dlpu/userphoto/{username}', function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
+    if(!in_array('read', $app->jwt->scope)) {
+        $response->getBody()->write(json_encode(['error' => 'Permission denied']));
+        $response = $response->withStatus(403);
+        $response = $response->withHeader('Content-type', 'application/json');
+        return $response;
+    }
+
+    require_once 'v1/dlpu/slim_handle.php';
+    return (new slim_handle($request, $response, $arguments))->save_userphoto();
+});
+
 
 $app->run();
