@@ -9,6 +9,7 @@ use Slim\Middleware\JwtAuthentication;
 use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 
+
 $configuration = [
     'settings' => [
         'displayErrorDetails' => true,
@@ -23,7 +24,7 @@ $app->add(new JwtAuthentication([
     "rules" => [
         new JwtAuthentication\RequestPathRule([
             "path" => '/',
-            "passthrough" => ["/v1/token","/wechat"]
+            "passthrough" => ["/v1/token"]
         ])
     ],
     "callback" => function(ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
@@ -216,16 +217,16 @@ $app->get('/v1/dlpu/announcement/{username}', function (ServerRequestInterface $
  * HEADERS
  *      Authorization    Bearer {access_token}
  *      password         {password}
- *      wechat_id        {wechat_id}
+ *      wechat           {wechat_id}
  * ===============================================
  * {username}           登陆账号, 这里为学号
  * {semester}           学期, eg. 2015-2016-1
- * {weeks}              周次, eg. 12
+ * {weeks}              可选项 周次, eg. 12
  * {access_token}       授权token
  * {password}           username的登陆密码
- * {wechat_id}          微信 openid
+ * {wechat}             微信 openid
  */
-$app->get('/v1/dlpu/curriculum_theory/{username}/{semester}/{weeks}', function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
+$app->get('/v1/dlpu/curriculum_theory/{username}/{semester}/[{weeks}]', function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
     if(!in_array('read', $app->jwt->scope)) {
         $response->getBody()->write(json_encode(['error' => 'Permission denied']));
         $response = $response->withStatus(403);
@@ -335,14 +336,16 @@ $app->post('/v1/dlpu/reset_password', function (ServerRequestInterface $request,
  *
  * HEADERS
  *      Authorization    Bearer {access_token}
+ *
+ * FORM-DATA
  *      username         {username}
  *      password         {password}
- *      wechat_id        {wechat_id}
+ *      wechat           {wechat}
  * ===============================================
  * {access_token}       授权token
  * {username}           用户名,学号
  * {password}           密码
- * {wechat_id}          微信 openid
+ * {wechat}             微信 openid
  */
 $app->post('/v1/dlpu/save', function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
     if(!in_array('read', $app->jwt->scope)) {
@@ -368,6 +371,23 @@ $app->get('/v1/dlpu/userphoto/{username}', function (ServerRequestInterface $req
     require_once 'v1/dlpu/slim_handle.php';
     return (new slim_handle($request, $response, $arguments))->save_userphoto();
 });
+
+/**
+ * 获取学校当前周次信息
+ */
+$app->get('/v1/dlpu/current_week', function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
+
+    require_once 'v1/dlpu/slim_handle.php';
+    return (new slim_handle($request, $response, $arguments))->current_week();
+});
+
+/**
+ * 绑定教务系统
+ */
+//$app->get('/mydlpu/binding/{wechat}', function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
+//    require_once 'v1/dlpu/mydlpu_handle.php';
+//    return (new mydlpu_handle())->bindingWechatWithUsername();
+//});
 
 
 $app->run();

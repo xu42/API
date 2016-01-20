@@ -24,7 +24,7 @@ class student_database_tools extends mongodb {
      */
     public function savePassword ($username, $password, $wechat_id)
     {
-        $this->update(['_id' => $username], ['_id' => $username, 'wechat_id' => $wechat_id, 'password' => $password], ['multi' => false, 'upsert' => true]);
+        $this->update(['_id' => $username, 'wechat_id' => $wechat_id], ['_id' => $username, 'wechat_id' => $wechat_id, 'password' => $password], ['multi' => false, 'upsert' => true]);
         return NULL;
     }
 

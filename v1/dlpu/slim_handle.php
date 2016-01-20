@@ -42,9 +42,10 @@ class slim_handle {
      */
     public function savePasswordToDatabase ()
     {
-        $username = $this->request->getgetHeaderLine('username');
-        $wechat_id = $this->request->getgetHeaderLine('wechat_id');
-        $password = $this->request->getgetHeaderLine('password');
+        $allPostPutVars = $this->request->getParsedBody();
+        $username = $allPostPutVars['username'];
+        $password = $allPostPutVars['password'];
+        $wechat_id = $allPostPutVars['wechat'];
 
         // 判断用户名密码是否正确, 正确则入库, 错误则不入库, 无论正确与错误都给出错误信息
         $is = (new student_login($username, $password))->loginAndReturnCookieOrFalse();
@@ -97,9 +98,12 @@ class slim_handle {
      */
     protected function loginAndReturnCookieOrFalse ()
     {
-//        $password = $this->getPasswordFromDatabaseByWechatId($this->request->getHeaderLine('wechat_id'));
-//        $student_login = new student_login($this->arguments['username'], $password);
-        $student_login = new student_login($this->arguments['username'], $this->request->getHeaderLine('password'));
+        if($this->request->getHeaderLine('wechat')){
+            $password = $this->getPasswordFromDatabaseByWechatId($this->request->getHeaderLine('wechat'));
+        }else{
+            $password = $this->request->getHeaderLine('password');
+        }
+        $student_login = new student_login($this->arguments['username'], $password);
         return $student_login->loginAndReturnCookieOrFalse();
     }
 
@@ -438,7 +442,7 @@ class slim_handle {
         if($this->request->getHeaderLine('latest') == 'yes') return $this->getCurriculumTheoryFromSchool();
 
         // 查看数据库中是否已有该条信息, 有则直接从数据库中拉数据
-        $find_res = $this->getCurriculumTheoryFromDatabase($this->arguments['username'], $this->arguments['semester'], $this->arguments['weeks']);
+        $find_res = @$this->getCurriculumTheoryFromDatabase($this->arguments['username'], $this->arguments['semester'], $this->arguments['weeks']);
         if($find_res) return $this->writeResponseBody($find_res->data);
 
         // 数据库中没有该条数据, 从学校服务器获取, 并存入数据库
@@ -534,4 +538,14 @@ class slim_handle {
         return $this->writeResponseBody($res);
     }
 
+    /**
+     * 获取学校当前周次信息
+     * @return mixed
+     */
+    public function current_week ()
+    {
+        require_once 'student_current_week.php';
+        $current_week = new student_current_week();
+        return $this->writeResponseBody($current_week->get());
+    }
 }
