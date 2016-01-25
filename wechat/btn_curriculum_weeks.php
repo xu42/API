@@ -16,7 +16,7 @@ $wechat_id = $_GET['wechat'];
 $userinfo = $mydlpu_handle->getSimpleUserinfoByWechat($wechat_id);
 $username = $userinfo->_id;
 
-$json = $mydlpu_handle->getCurriculumWeeks($username, $semester, $current_week, $wechat_id);
+$json = $mydlpu_handle->getCurriculumWeeks($username, $semester, '1', $wechat_id);
 $curriculum_weeks = json_decode($json, 1);
 
 function a ($number)
@@ -59,7 +59,7 @@ function a ($number)
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
-    <link rel="stylesheet" href="../assets/css/weui.min.css"/>
+    <link rel="stylesheet" href="../assets/css/amazeui.min.css"/>
 </head>
 <body>
 <!--<div class="weui_cells">
@@ -85,92 +85,112 @@ function a ($number)
     </div>
 </div>-->
 
-<article class="weui_article">
-    <h1>周一</h1>
-    <section>
-        <?php
-        for($i=0; $i<6;$i++)
+
+<h2>周一</h2>
+<table class="am-table am-table-bordered am-table-compact am-text-truncate">
+    <?php
+    for($i=0; $i<6;$i++)
+    {
+        if(@$curriculum_weeks['data'][$i][0])
         {
-            if(@$curriculum_weeks['data'][$i][0])
-            {
-                echo "<b>".a($i).":</b> " . $curriculum_weeks['data'][$i][0][0] . ' | ' . $curriculum_weeks['data'][$i][0][2] . "<br/>";
-            }
+            echo "<tr><td>".a($i)."</td>";
+            echo "<td>".$curriculum_weeks['data'][$i][0][0]."</td>";
+            echo "<td>".$curriculum_weeks['data'][$i][0][2]."</td></tr>";
         }
-        ?>
-    </section>
-    <h1>周二</h1>
-    <section>
-        <?php
-        for($i=0; $i<6;$i++)
+    }
+    ?>
+</table>
+
+<h2>周二</h2>
+<table class="am-table am-table-bordered am-table-compact am-text-truncate">
+    <?php
+    for($i=0; $i<6;$i++)
+    {
+        if(@$curriculum_weeks['data'][$i][1])
         {
-            if(@$curriculum_weeks['data'][$i][1])
-            {
-                echo "<b>".a($i).":</b> " . $curriculum_weeks['data'][$i][1][0] . ' | ' . $curriculum_weeks['data'][$i][1][2] . "<br/>";
-            }
+            echo "<tr><td>".a($i)."</td>";
+            echo "<td>".$curriculum_weeks['data'][$i][1][0]."</td>";
+            echo "<td>".$curriculum_weeks['data'][$i][1][2]."</td></tr>";
         }
-        ?>
-    </section>
-    <h1>周三</h1>
-    <section>
-        <?php
-        for($i=0; $i<6;$i++)
+    }
+    ?>
+</table>
+
+<h2>周三</h2>
+<table class="am-table am-table-bordered am-table-compact am-text-truncate">
+    <?php
+    for($i=0; $i<6;$i++)
+    {
+        if(@$curriculum_weeks['data'][$i][2])
         {
-            if(@$curriculum_weeks['data'][$i][2])
-            {
-                echo "<b>".a($i).":</b> " . $curriculum_weeks['data'][$i][2][0] . ' | ' . $curriculum_weeks['data'][$i][2][2] . "<br/>";
-            }
+            echo "<tr><td>".a($i)."</td>";
+            echo "<td>".$curriculum_weeks['data'][$i][2][0]."</td>";
+            echo "<td>".$curriculum_weeks['data'][$i][2][2]."</td></tr>";
         }
-        ?>
-    </section>
-    <h1>周四</h1>
-    <section>
-        <?php
-        for($i=0; $i<6;$i++)
+    }
+    ?>
+</table>
+
+<h2>周四</h2>
+<table class="am-table am-table-bordered am-table-compact am-text-truncate">
+    <?php
+    for($i=0; $i<6;$i++)
+    {
+        if(@$curriculum_weeks['data'][$i][3])
         {
-            if(@$curriculum_weeks['data'][$i][3])
-            {
-                echo "<b>".a($i).":</b> " . $curriculum_weeks['data'][$i][3][0] . ' | ' . $curriculum_weeks['data'][$i][3][2] . "<br/>";
-            }
+            echo "<tr><td>".a($i)."</td>";
+            echo "<td>".$curriculum_weeks['data'][$i][3][0]."</td>";
+            echo "<td>".$curriculum_weeks['data'][$i][3][2]."</td></tr>";
         }
-        ?>
-    </section>
-    <h1>周五</h1>
-    <section>
-        <?php
-        for($i=0; $i<6;$i++)
+    }
+    ?>
+</table>
+
+
+<h2>周五</h2>
+<table class="am-table am-table-bordered am-table-compact am-text-truncate">
+    <?php
+    for($i=0; $i<6;$i++)
+    {
+        if(@$curriculum_weeks['data'][$i][4])
         {
-            if(@$curriculum_weeks['data'][$i][4])
-            {
-                echo "<b>".a($i).":</b> " . $curriculum_weeks['data'][$i][4][0] . ' | ' . $curriculum_weeks['data'][$i][4][2] . "<br/>";
-            }
+            echo "<tr><td>".a($i)."</td>";
+            echo "<td>".$curriculum_weeks['data'][$i][4][0]."</td>";
+            echo "<td>".$curriculum_weeks['data'][$i][4][2]."</td></tr>";
         }
-        ?>
-    </section>
-    <h1>周六</h1>
-    <section>
-        <?php
-        for($i=0; $i<6;$i++)
+    }
+    ?>
+</table>
+
+<h2>周六</h2>
+<table class="am-table am-table-bordered am-table-compact am-text-truncate">
+    <?php
+    for($i=0; $i<6;$i++)
+    {
+        if(@$curriculum_weeks['data'][$i][5])
         {
-            if(@$curriculum_weeks['data'][$i][5])
-            {
-                echo "<b>".a($i).":</b> " . $curriculum_weeks['data'][$i][5][0] . ' | ' . $curriculum_weeks['data'][$i][5][2] . "<br/>";
-            }
+            echo "<tr><td>".a($i)."</td>";
+            echo "<td>".$curriculum_weeks['data'][$i][5][0]."</td>";
+            echo "<td>".$curriculum_weeks['data'][$i][5][2]."</td></tr>";
         }
-        ?>
-    </section>
-    <h1>周日</h1>
-    <section>
-        <?php
-        for($i=0; $i<6;$i++)
+    }
+    ?>
+</table>
+
+<h2>周日</h2>
+<table class="am-table am-table-bordered am-table-compact am-text-truncate">
+    <?php
+    for($i=0; $i<6;$i++)
+    {
+        if(@$curriculum_weeks['data'][$i][6])
         {
-            if(@$curriculum_weeks['data'][$i][6])
-            {
-                echo "<b>".a($i).":</b> " . $curriculum_weeks['data'][$i][6][0] . ' | ' . $curriculum_weeks['data'][$i][6][2] . "<br/>";
-            }
+            echo "<tr><td>".a($i)."</td>";
+            echo "<td>".$curriculum_weeks['data'][$i][6][0]."</td>";
+            echo "<td>".$curriculum_weeks['data'][$i][6][2]."</td></tr>";
         }
-        ?>
-    </section>
-</article>
+    }
+    ?>
+</table>
 
 </body>
 </html>

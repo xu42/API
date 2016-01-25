@@ -64,25 +64,25 @@ function a ($number)
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <title>明日课表</title>
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
     <link rel="stylesheet" href="../assets/css/weui.min.css"/>
 </head>
 <body>
 
-<article class="weui_article">
-    <h1>明日课表</h1>
-    <section>
-        <?php
-        for($i=0; $i<6;$i++)
+<table class="am-table am-table-bordered am-table-compact am-text-truncate">
+    <?php
+    for($i=0; $i<6;$i++)
+    {
+        if(@$curriculum_weeks['data'][$i][getTomorrowDay()])
         {
-            if(@$curriculum_weeks['data'][$i][getTomorrowDay()])
-            {
-                echo "<b>".a($i).":</b> " . $curriculum_weeks['data'][$i][getTomorrowDay()][0] . ' | '  . $curriculum_weeks['data'][$i][getTomorrowDay()][2] . "<br/>";
-            }
+            echo "<tr><td>".a($i)."</td>";
+            echo "<td>".$curriculum_weeks['data'][$i][getTomorrowDay()][0]."</td>";
+            echo "<td>".$curriculum_weeks['data'][$i][getTomorrowDay()][2]."</td></tr>";
         }
-        ?>
-    </section>
-</article>
+    }
+    ?>
+</table>
 
 </body>
 </html>

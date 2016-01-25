@@ -8,6 +8,7 @@
 
 define('database_dlpu_userinfo_name', 'dlpu_userinfo');
 define('collection_password_name', 'password');
+define('SEMESTER', '2015-2016-2');
 
 class mydlpu_handle {
 
@@ -39,6 +40,16 @@ class mydlpu_handle {
         return $db->getPasswordFromDatabaseByWechatId($wechat_id);
     }
 
+    /**
+     * 根据微信openid获取用户名（学号）
+     * @param $wechat_id
+     * @return mixed
+     */
+    public function getUsernameByWechat ($wechat_id)
+    {
+        $userinfo = $this->getSimpleUserinfoByWechat($wechat_id);
+        return $userinfo->_id;
+    }
 
     /**
      * 一个GET & POST 请求方式的PHP CURL HTTPS封装函数
@@ -132,16 +143,35 @@ class mydlpu_handle {
     }
 
     /**
-     * 获取当前为周几
+     * 获取学生成绩信息
+     * @param $username
+     * @param $semester
+     * @param $wechat_id
      * @return mixed
      */
-    public function getCurrentDay()
+    public function getScore ($username, $wechat_id, $semester = '')
     {
-        $weekarray = [6, 0, 1, 2, 3, 4, 5];
-        return $weekarray[date('w')];
+        $url = 'https://api.xu42.cn/v1/dlpu/usergrade/'.$username.'/'.$semester;
+        $headers = ['Authorization:' . $this->getToken(), 'wechat:' . $wechat_id];
+        return $this->myCurl($url, $headers);
     }
 
-    private function a ($number)
+    /**
+     * 获取考试安排信息
+     * @param $username
+     * @param $semester
+     * @param $wechat_id
+     * @param string $category  考试安排分类信息 考试类别，1 => 期初, 2 => 期中, 3 => 期末
+     * @return mixed
+     */
+    public function getExamArrangement ($username, $semester, $wechat_id, $category = '3')
+    {
+        $url = 'https://api.xu42.cn/v1/dlpu/exam_arrangement/'.$username.'/'.$semester.'/'.$category;
+        $headers = ['Authorization:' . $this->getToken(), 'wechat:' . $wechat_id];
+        return $this->myCurl($url, $headers);
+    }
+
+    public function translationToHans ($number)
     {
         switch ($number)
         {
@@ -175,24 +205,9 @@ class mydlpu_handle {
         return $res;
     }
 
-    public function getCurriculumDay ($wechat_id)
+    function getCurrentDay ()
     {
-        $semester ='2015-2016-2';
-        $username = $this->getSimpleUserinfoByWechat($wechat_id)->_id;
-        return $username;
-        $json = $this->getCurriculumWeeks($username, $semester, '1', $wechat_id);
-        $curriculum_weeks = json_decode($json, 1);
-
-        $res = NULL;
-        for($i=0; $i<6;$i++)
-        {
-            if(@$curriculum_weeks['data'][$i][$this->getCurrentDay()])
-            {
-                $res[] .=  "<b>".$this->a($i).":</b> " . $curriculum_weeks['data'][$i][$this->getCurrentDay()][0] . ' | '  . $curriculum_weeks['data'][$i][$this->getCurrentDay()][2];
-            }
-        }
-
-        return $res;
+        $weekarray = [6, 0, 1, 2, 3, 4, 5];
+        return $weekarray[date('w')];
     }
-
 }

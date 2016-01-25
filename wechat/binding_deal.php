@@ -30,6 +30,7 @@ if($res['messages']) {
     $json = $mydlpu_handle->bindingWechatWithUsername($username, $password, $wechat);
     $res = json_decode($json, 1);
 }
+
 ?>
 
 <html>

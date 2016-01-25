@@ -38,7 +38,7 @@ class slim_handle {
 
 
     /**
-     * 接收客户端保存&更新密码的需求, 用户名、微信openid和密码,全部在Header中传输
+     * 接收客户端保存&更新密码的需求, 用户名、微信openid和密码s
      */
     public function savePasswordToDatabase ()
     {
@@ -385,7 +385,7 @@ class slim_handle {
         if($this->request->getHeaderLine('latest') == 'yes') return $this->getUsergradeFromSchool();
 
         // 查看数据库中是否已有该条信息, 有则直接从数据库中拉数据
-        $find_res = $this->getGradeFromDatabase($this->arguments['username'], $this->arguments['kksj']);
+        $find_res = @$this->getGradeFromDatabase($this->arguments['username'], $this->arguments['kksj']);
         if($find_res) return $this->writeResponseBody($find_res->data);
 
         // 数据库中没有该条数据, 网页模拟登录抓取学生成绩信息数据, 并存入数据库
