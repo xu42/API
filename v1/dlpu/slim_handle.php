@@ -74,7 +74,7 @@ class slim_handle {
      */
     protected function noPassword ()
     {
-        $this->response->getBody()->write(json_encode(['error' => 'no student_id password']));
+        $this->response->getBody()->write(json_encode(['messages' => 'error', 'data' => 'no student_id password']));
         $response = $this->response->withStatus(400);
         $response = $response->withHeader('Content-type', 'application/json');
         return $response;
@@ -86,7 +86,7 @@ class slim_handle {
      */
     protected function wrongPassword ()
     {
-        $this->response->getBody()->write(json_encode(['error' => 'wrong student_id or password']));
+        $this->response->getBody()->write(json_encode(['messages' => 'error', 'data' => 'wrong student_id or password']));
         $response = $this->response->withStatus(400);
         $response = $response->withHeader('Content-type', 'application/json');
         return $response;
@@ -547,5 +547,44 @@ class slim_handle {
         require_once 'student_current_week.php';
         $current_week = new student_current_week();
         return $this->writeResponseBody($current_week->get());
+    }
+
+
+    /**
+     * 签到系统 获取二维码
+     * @return array
+     */
+    public function rollcallGetQR ()
+    {
+        require_once 'rollcall_teacher.php';
+        $allPostPutVars = $this->request->getParsedBody();
+        $res = (new rollcall_teacher())->getQR($allPostPutVars['teacher_job_number'], $allPostPutVars['teacher_password'], $allPostPutVars['teacher_current_room_number'], $allPostPutVars['teacher_current_session']);
+        return $this->writeResponseBody($res['data'], $res['messages']);
+    }
+
+    /**
+     * 签到系统 学生扫码签到
+     * @return mixed
+     */
+    public function rollcallStudentRollcall ()
+    {
+        require_once 'rollcall_student.php';
+        $allPostPutVars = $this->request->getParsedBody();
+        $res = (new rollcall_student())->saveStudentRollcallRecord($allPostPutVars['qrdata']);
+        return $this->writeResponseBody($res['data'], $res['messages']);
+    }
+
+    /**
+     * 签到系统 学生绑定客户端
+     * @return mixed
+     */
+    public function rollcallBindingStudentClient ()
+    {
+        $is = $this->loginAndReturnCookieOrFalse();
+        if(!$is) return $this->wrongPassword();
+
+        require_once 'rollcall_student.php';
+        $res = (new rollcall_student())->bindingStudentClient($this->arguments['username'], $this->request->getHeaderLine('client'));
+        return $this->writeResponseBody($res['data'], $res['messages']);
     }
 }

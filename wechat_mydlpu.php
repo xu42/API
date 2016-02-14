@@ -1,13 +1,9 @@
 <?php
-
+error_reporting(0);
 require_once 'vendor/autoload.php';
-
+require_once 'v1/dlpu/mydlpu_handle.php';
 use Overtrue\Wechat\Server;
 use Overtrue\Wechat\Message;
-
-define('database_dlpu_userinfo_name', 'dlpu_userinfo');
-define('collection_password_name', 'password');
-
 
 $appId                          = 'wxbb7d2a97fd25ca97';
 $secret                         = 'c434b2a5aefce35f44a1f88ffec1d323';
@@ -17,13 +13,39 @@ $encodingAESKey                 = '9FfoDHT1URoPvrXlgzrgAkDc4jozKhNMOcSITFpoARI';
 $server = new Server($appId, $token, $encodingAESKey);
 
 // 监听所有类型
-$server->on('message', function($message) {
-    return Message::make('text')->content('In development');
-});
+//$server->on('message', function($message) {
+//    return Message::make('text')->content('In development');
+//});
+
+// 监听图片
+//$server->on('message', 'image', function($message) {
+//    return Message::make('text')->content($message['MediaId']);
+//});
 
 // 监听二维码扫描事件
 $server->on('event', 'scancode_waitmsg', function($event) {
-    return Message::make('text')->content($event['ScanCodeInfo']['ScanResult']);
+    if(!getSimpleUserinfoByWechat($event['FromUserName'])) return Message::make('news')->items(function() use ($event) {
+        return array(
+            Message::make('news_item')->title('您还没有绑定教务系统'),
+            Message::make('news_item')->title('点此绑定')->url('https://api.xu42.cn/wechat/binding.php?wechat='.$event['FromUserName'].'&btn='.$event['EventKey'])->picUrl(''),
+        );
+    });  // 此微信账户 未绑定教务系统, 执行绑定
+    $mydlpu_handle = new mydlpu_handle();
+
+    $qrcode_base64 = substr($event['ScanCodeInfo']['ScanResult'], 3);   // 所扫的码
+    $username = $mydlpu_handle->getUsernameByWechat($event['FromUserName']);    // 学号
+    $qrcode_req = base64_decode($qrcode_base64) . '|' . $username . '|' . time();   // 学生签到发送的数据
+    $res_json = $mydlpu_handle->getStudentRollcallResult('wec'.base64_encode($qrcode_req));  // 加入3个无关字符，获取扫描结果
+
+    $response = '二维码错误, 签到失败';
+    $res = json_decode($res_json, TRUE);
+    if($res['data'] && $res['messages'] == 'OK'){
+        $response = '学号:' . $res['data']['7'] . "\n" . '教室:' . $res['data']['1'] . "\n\n" . '签到成功';
+    }
+    if($res['data'] && $res['messages'] == 'error'){
+        $response = $res['data'];
+    }
+    return Message::make('text')->content($response);
 });
 
 // 监听菜单点击事件
@@ -85,39 +107,57 @@ $server->on('event', 'CLICK', function($event) {
         );
     });
 
+    /**
+     * 构造微信课表图文
+     * @param $curriculum_array
+     * @return mixed
+     */
+    function message_news_curriculum ($curriculum_array)
+    {
+        if(strlen($curriculum_array[1]) == 0) return Message::make('text')->content('无课哟');
+
+        return Message::make('news')->items(function() use ($curriculum_array) {
+            return array(
+                Message::make('news_item')->title($curriculum_array[0])->description($curriculum_array[1])
+            );
+        });
+    }
+
+
+    $mydlpu_handle = new mydlpu_handle();
+    $semester ='2015-2016-2';
+    $current_week = $mydlpu_handle->getCurrentWeek();
+    $userinfo = $mydlpu_handle->getSimpleUserinfoByWechat($event['FromUserName']);
+    $username = $userinfo->_id;
+    $json = $mydlpu_handle->getCurriculumWeeks($username, $semester, '1', $event['FromUserName']);
+    $curriculum_weeks = json_decode($json, 1);
+
     switch($event['EventKey'])
     {
         case 'btn_curriculum_today':
             if(!getSimpleUserinfoByWechat($event['FromUserName'])) return $message_news_binding;  // 此微信账户 未绑定教务系统, 执行绑定
-//            require_once 'v1/dlpu/mydlpu_handle.php';
 
-//            $mydlpu_handle = new  mydlpu_handle();
-//            $current_week = $mydlpu_handle->getCurrentWeek();
-//            $username = $mydlpu_handle->getSimpleUserinfoByWechat($event['FromUserName']);
-//            $json = $mydlpu_handle->getCurriculumWeeks($username, SEMESTER, '1', $event['FromUserName']);
-//            $curriculum_weeks = json_decode($json, 1);
-//            return Message::make('text')->content($json);
-//
-//            for($i=0; $i<6;$i++)
-//            {
-//                if(@$curriculum_weeks['data'][$i][getCurrentDay()])
-//                {
-//                    $curriculum[] = $mydlpu_handle->translationToHans($i) . " · " . $curriculum_weeks['data'][$i][$mydlpu_handle->getCurrentDay()][2] . " · " . $curriculum_weeks['data'][$i][$mydlpu_handle->getCurrentDay()][0];
-//                }
-//            }
-//
-//            return Message::make('news')->items(function() use ($curriculum) {
-//                return array(
-//                    Message::make('news_item')->title('今日课表'),
-//                    Message::make('news_item')->title($curriculum[1])
-//                );
-//            });
-
-            return $message_news_curriculum_today;
+            $today = '';
+            for($i=0; $i<6;$i++)
+            {
+                if(@$curriculum_weeks['data'][$i][$mydlpu_handle->getCurrentDay()])
+                {
+                    $today .= $mydlpu_handle->translationToHans($i) . "   " . $curriculum_weeks['data'][$i][$mydlpu_handle->getCurrentDay()][2] . "   " . $curriculum_weeks['data'][$i][$mydlpu_handle->getCurrentDay()][0] . "\n";
+                }
+            }
+            return message_news_curriculum(['今日课表', $today]);
             break;
         case 'btn_curriculum_tomorrow':
             if(!getSimpleUserinfoByWechat($event['FromUserName'])) return $message_news_binding;  // 此微信账户 未绑定教务系统, 执行绑定
-            return $message_news_curriculum_tomorrow;
+            $tomorrow = '';
+            for($i=0; $i<6;$i++)
+            {
+                if(@$curriculum_weeks['data'][$i][$mydlpu_handle->getTomorrowDay()])
+                {
+                    $tomorrow .= $mydlpu_handle->translationToHans($i) . "   " . $curriculum_weeks['data'][$i][$mydlpu_handle->getTomorrowDay()][2] . "   " . $curriculum_weeks['data'][$i][$mydlpu_handle->getTomorrowDay()][0] . "\n";
+                }
+            }
+            return message_news_curriculum(['明日课表', $tomorrow]);
             break;
         case 'btn_curriculum_weeks':
             if(!getSimpleUserinfoByWechat($event['FromUserName'])) return $message_news_binding;  // 此微信账户 未绑定教务系统, 执行绑定
@@ -127,6 +167,8 @@ $server->on('event', 'CLICK', function($event) {
             if(!getSimpleUserinfoByWechat($event['FromUserName'])) return $message_news_binding;  // 此微信账户 未绑定教务系统, 执行绑定
             return $message_news_curriculum_semester;
             break;
+        case 'btn_xiaoli':
+            return Message::make('image')->media_id('06iXJmwkBfbeiNtTuYWNytZgr8ehIekv8VUx5YR23FDNzcqc2oPerSPy0i5JA-eA');
         case 'btn_score_semester':
             if(!getSimpleUserinfoByWechat($event['FromUserName'])) return $message_news_binding;  // 此微信账户 未绑定教务系统, 执行绑定
             return $message_news_score_semester;

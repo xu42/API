@@ -24,7 +24,7 @@ $app->add(new JwtAuthentication([
     "rules" => [
         new JwtAuthentication\RequestPathRule([
             "path" => '/',
-            "passthrough" => ["/v1/token"]
+            "passthrough" => ["/v1/token", "/v1/dlpu/rollcall_getqr", "/v1/dlpu/rollcall_rc", "/v1/dlpu/rollcall_stu_binding/"]
         ])
     ],
     "callback" => function(ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
@@ -389,5 +389,51 @@ $app->get('/v1/dlpu/current_week', function (ServerRequestInterface $request, Re
 //    return (new mydlpu_handle())->bindingWechatWithUsername();
 //});
 
+
+/**
+ * 签到系统 获取二维码
+ * ===============================================
+ * POST                   /v1/dlpu/rollcall_getqr
+ *
+ * FORM-DATA
+ *      teacher_job_number              // 教师工号
+ *      teacher_password                // 教师密码
+ *      teacher_current_room_number     // 当前授课教室编号
+ *      teacher_current_session         // 当前节次
+ */
+$app->post('/v1/dlpu/rollcall_getqr', function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use($app) {
+    require_once 'v1/dlpu/slim_handle.php';
+    return (new slim_handle($request, $response, $arguments))->rollcallGetQR();
+});
+
+
+/**
+ * 签到系统 学生签到
+ * ===============================================
+ * POST                   /v1/dlpu/rollcall_rc
+ *
+ * FORM-DATA
+ *      qrdata           // 二维码数据
+ */
+$app->post('/v1/dlpu/rollcall_rc', function(ServerRequestInterface $request, ResponseInterface $response, $arguments) {
+    require_once 'v1/dlpu/slim_handle.php';
+    return (new slim_handle($request, $response, $arguments))->rollcallStudentRollcall();
+});
+
+/**
+ * 签到系统 学生绑定客户端
+ * ===============================================
+ * POST                   /v1/dlpu/rollcall_stu_binding/{username}
+ *
+ * HEADERS
+ *      password         {password}
+ *      client           客户端标识
+ *
+ * {username}           用户名,学号
+ */
+$app->post('/v1/dlpu/rollcall_stu_binding/{username}', function(ServerRequestInterface $request, ResponseInterface $response, $arguments) {
+    require_once 'v1/dlpu/slim_handle.php';
+    return (new slim_handle($request, $response, $arguments))->rollcallBindingStudentClient();
+});
 
 $app->run();

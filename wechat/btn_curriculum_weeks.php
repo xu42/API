@@ -6,7 +6,7 @@
  * Time: 14:45
  */
 require_once '../v1/dlpu/mydlpu_handle.php';
-
+error_reporting(0);
 $mydlpu_handle = new mydlpu_handle();
 
 $semester ='2015-2016-2';

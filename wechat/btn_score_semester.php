@@ -6,7 +6,7 @@
  * Time: 18:45
  */
 require_once '../v1/dlpu/mydlpu_handle.php';
-
+error_reporting(0);
 $mydlpu_handle = new mydlpu_handle();
 
 $semester ='2015-2016-1';
@@ -44,7 +44,11 @@ $score = json_decode($json, 1);
         {
             if(@$score['data']['1'][$i])
             {
-                echo "<tr><td>".$score['data']['1'][$i]['3']."</td>";
+                $course_title = $course_title_short = $score['data']['1'][$i]['3'];
+                if(strlen($course_title) > 33){
+                    $course_title_short = substr($course_title, 0, 33) . '...';
+                }
+                echo "<tr><td>".$course_title_short."</td>";
                 echo "<td>".$score['data']['1'][$i]['4']."</td>";
                 echo "<td>".$score['data']['1'][$i]['10']."</td></tr>";
             }

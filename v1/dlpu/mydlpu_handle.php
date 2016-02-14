@@ -137,7 +137,7 @@ class mydlpu_handle {
             $headers = ['Authorization:' . $this->getToken()];
             $json = $this->myCurl($url, $headers);
             $currentweek = json_decode($json)->data;
-            $memcache->set('currentweek', $currentweek);
+            $memcache->set('currentweek', $currentweek, time() + 3600);
         }
         return $currentweek;
     }
@@ -171,6 +171,19 @@ class mydlpu_handle {
         return $this->myCurl($url, $headers);
     }
 
+    /**
+     * 签到系统 学生签到
+     * @param $qrcode_data
+     * @return mixed
+     */
+    public function getStudentRollcallResult ($qrcode_data)
+    {
+        $url = 'https://api.xu42.cn/v1/dlpu/rollcall_rc';
+        $headers = [];
+        $postdata = ['qrdata' => $qrcode_data];
+        return $this->myCurl($url, $headers, $postdata);
+    }
+    
     public function translationToHans ($number)
     {
         switch ($number)
@@ -208,6 +221,12 @@ class mydlpu_handle {
     function getCurrentDay ()
     {
         $weekarray = [6, 0, 1, 2, 3, 4, 5];
+        return $weekarray[date('w')];
+    }
+
+    function getTomorrowDay ()
+    {
+        $weekarray = [0, 1, 2, 3, 4, 5, 6];
         return $weekarray[date('w')];
     }
 }
