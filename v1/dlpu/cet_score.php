@@ -1,5 +1,6 @@
 <?php
-
+error_reporting(0);
+require_once 'mongodb.php';
 class cet_score{
 
     /**
@@ -81,10 +82,14 @@ class cet_score{
         $arrayData = self::getArrayData($webPage);
 
         if($arrayData){
-            $response->getBody()->write(json_encode(['messages' => 'success', 'data' => ['content' => $arrayData]]));
+            $response->getBody()->write(json_encode(['messages' => 'success', 'data' => $arrayData]));
             $response = $response->withStatus(200);
+
+            // 存入数据库
+            $db = new mongodb('cet_score', 'cet_score');
+            $db->update(['_id'=> $args['numbers']], $arrayData, ['multi' => false, 'upsert' => true]);
         } else {
-            $response->getBody()->write(json_encode(['error' => 'INVALID REQUEST']));
+            $response->getBody()->write(json_encode(['messages' => 'error', 'data' => '准考证号或姓名错误']));
             $response = $response->withStatus(400);
         }
 

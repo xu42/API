@@ -122,7 +122,7 @@ $app->get('/v1/cet_score/{name}/{numbers}', function (ServerRequestInterface $re
         return $response;
     }
 
-    require_once 'v1/cet_score/cet_score.php';
+    require_once 'v1/dlpu/cet_score.php';
     return cet_score::get($request, $response, $arguments);
 });
 

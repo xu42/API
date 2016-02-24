@@ -1,4 +1,5 @@
 <?php
+error_reporting(0);
 /**
  * Created by PhpStorm.
  * User: xuyan
@@ -183,7 +184,20 @@ class mydlpu_handle {
         $postdata = ['qrdata' => $qrcode_data];
         return $this->myCurl($url, $headers, $postdata);
     }
-    
+
+    /**
+     * 获取四六级成绩
+     * @param $name     姓名
+     * @param $number   学号
+     * @return mixed
+     */
+    public function getCETScore ($name, $number)
+    {
+        $url = 'https://api.xu42.cn/v1/cet_score/'.$name.'/'.$number;
+        $headers = ['Authorization:' . $this->getToken()];
+        return $this->myCurl($url, $headers);
+    }
+
     public function translationToHans ($number)
     {
         switch ($number)

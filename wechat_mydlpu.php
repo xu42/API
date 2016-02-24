@@ -22,6 +22,24 @@ $server = new Server($appId, $token, $encodingAESKey);
 //    return Message::make('text')->content($message['MediaId']);
 //});
 
+// 监听文本内容
+$server->on('message', 'text', function($message) {
+    if(substr($message['Content'],0,3) == 'cet' or substr($message['Content'],0,3) == 'CET'){
+        return Message::make('text')->content("2016年2月26日上午9时发布");
+        preg_match_all('/\d+/', $message['Content'], $number);
+        $name = substr($message['Content'],3, -15);
+        $mydlpu_handle = new mydlpu_handle();
+        $cet_score = $mydlpu_handle->getCETScore($name, $number[0][0]);
+        $cet_score = json_decode($cet_score, 1);
+        if($cet_score['messages'] == 'error') return Message::make('text')->content($cet_score['data']);
+        if($cet_score['messages'] == 'success')
+        {
+            $res = $cet_score['data']['0'] . ' : '. $cet_score['data']['1'] . "\n" . $cet_score['data']['10'] . ' : ' . $cet_score['data']['11']. "\n" . $cet_score['data']['12'] . ' : ' . $cet_score['data']['13']. "\n" . $cet_score['data']['14'] . ' : ' . $cet_score['data']['15']. "\n" . $cet_score['data']['16'] . ' : ' . $cet_score['data']['17'];
+            return Message::make('text')->content($res);
+        }
+    }
+});
+
 // 监听二维码扫描事件
 $server->on('event', 'scancode_waitmsg', function($event) {
     if(!getSimpleUserinfoByWechat($event['FromUserName'])) return Message::make('news')->items(function() use ($event) {
@@ -125,12 +143,15 @@ $server->on('event', 'CLICK', function($event) {
 
 
     $mydlpu_handle = new mydlpu_handle();
-    $semester ='2015-2016-2';
+    $current_semester ='2015-2016-2';
+    $previous_semester ='2015-2016-1';
     $current_week = $mydlpu_handle->getCurrentWeek();
     $userinfo = $mydlpu_handle->getSimpleUserinfoByWechat($event['FromUserName']);
     $username = $userinfo->_id;
-    $json = $mydlpu_handle->getCurriculumWeeks($username, $semester, '1', $event['FromUserName']);
-    $curriculum_weeks = json_decode($json, 1);
+
+    $curriculum_weeks = json_decode($mydlpu_handle->getCurriculumWeeks($username, $current_semester, '1', $event['FromUserName']), 1);
+    $score_semester = json_decode($mydlpu_handle->getScore($username, $event['FromUserName'], $previous_semester), 1);
+    $exam_arrangement = json_decode($mydlpu_handle->getExamArrangement($username, $previous_semester, $event['FromUserName']), 1);
 
     switch($event['EventKey'])
     {
@@ -168,10 +189,23 @@ $server->on('event', 'CLICK', function($event) {
             return $message_news_curriculum_semester;
             break;
         case 'btn_xiaoli':
-            return Message::make('image')->media_id('06iXJmwkBfbeiNtTuYWNytZgr8ehIekv8VUx5YR23FDNzcqc2oPerSPy0i5JA-eA');
+            return Message::make('image')->media_id('SjpYQYO6pktZABBZ86eoZid9z0aQZfDDfGmKqnEg-sLwcoDUR4imPbb2WXSAVt5u');
         case 'btn_score_semester':
             if(!getSimpleUserinfoByWechat($event['FromUserName'])) return $message_news_binding;  // 此微信账户 未绑定教务系统, 执行绑定
-            return $message_news_score_semester;
+            $score = '同学: ' . $username . "\n" . "最近学期的成绩如下\n\n";
+
+            for($i=1; $i<count($score_semester['data']['1']);$i++)
+            {
+                if(@$score_semester['data']['1'][$i])
+                {
+                    $course_title = $course_title_short = $score_semester['data']['1'][$i]['3'];
+                    if(strlen($course_title) > 27){
+                        $course_title_short = substr($course_title, 0, 27) . '...';
+                    }
+                    $score .= $course_title_short . " : " . $score_semester['data']['1'][$i]['4'] . "\n";
+                }
+            }
+            return Message::make('text')->content($score);
             break;
         case 'btn_score_all':
             if(!getSimpleUserinfoByWechat($event['FromUserName'])) return $message_news_binding;  // 此微信账户 未绑定教务系统, 执行绑定
@@ -179,7 +213,16 @@ $server->on('event', 'CLICK', function($event) {
             break;
         case 'btn_exam_arrangement':
             if(!getSimpleUserinfoByWechat($event['FromUserName'])) return $message_news_binding;  // 此微信账户 未绑定教务系统, 执行绑定
-            return $message_news_exam_arrangement;
+            $exam = '';
+            for($i=1; $i<count($exam_arrangement['data']);$i++)
+            {
+                if(@$exam_arrangement['data'][$i])
+                {
+                    $exam .= $exam_arrangement['data'][$i]['3'] .' '. $exam_arrangement['data'][$i]['5'] .' '. $exam_arrangement['data'][$i]['4'] . "\n";
+                }
+            }
+            return message_news_curriculum(['考试安排', $exam]);
+//            return $message_news_exam_arrangement;
         default:
             return Message::make('text')->content('In development');
             break;
