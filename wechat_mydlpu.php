@@ -25,7 +25,7 @@ $server = new Server($appId, $token, $encodingAESKey);
 // 监听文本内容
 $server->on('message', 'text', function($message) {
     if(substr($message['Content'],0,3) == 'cet' or substr($message['Content'],0,3) == 'CET'){
-        return Message::make('text')->content("2016年2月26日上午9时发布");
+//        return Message::make('text')->content("2016年2月26日上午9时发布");
         preg_match_all('/\d+/', $message['Content'], $number);
         $name = substr($message['Content'],3, -15);
         $mydlpu_handle = new mydlpu_handle();

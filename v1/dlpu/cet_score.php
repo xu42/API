@@ -10,7 +10,7 @@ class cet_score{
      */
     static private function getUrl($zkzh, $xm){
 
-        (is_numeric($zkzh) && (strlen($zkzh) === 15) && is_string($xm) && (strlen($xm) > 8)) ? $url = 'http://www.chsi.com.cn/cet/query?zkzh='.$zkzh.'&xm='.urlencode($xm) : $url = NULL;
+        (is_numeric($zkzh) && (strlen($zkzh) === 15) && is_string($xm) && (strlen($xm) > 3)) ? $url = 'http://www.chsi.com.cn/cet/query?zkzh='.$zkzh.'&xm='.urlencode($xm) : $url = NULL;
         return $url;
     }
 
