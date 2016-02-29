@@ -49,7 +49,8 @@ if($res['messages']) {
     <div class="weui_opr_area">
         <p class="weui_btn_area">
             <?php if($res['messages'] == 'OK') { ?>
-                <button onclick="location.href='<?=$url ?>'" class="weui_btn weui_btn_primary">确定</button>
+<!--                <button onclick="location.href='--><?//=$url ?>//'" class="weui_btn weui_btn_primary">确定</button>
+                <button onclick="WeixinJSBridge.call('closeWindow');" class="weui_btn weui_btn_primary">确定</button>
             <?php }else{ ?>
                 <button onclick="window.history.back(-1);" class="weui_btn weui_btn_warn">返回</button>
             <?php }?>

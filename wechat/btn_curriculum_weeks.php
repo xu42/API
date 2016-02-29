@@ -16,7 +16,7 @@ $wechat_id = $_GET['wechat'];
 $userinfo = $mydlpu_handle->getSimpleUserinfoByWechat($wechat_id);
 $username = $userinfo->_id;
 
-$json = $mydlpu_handle->getCurriculumWeeks($username, $semester, '1', $wechat_id);
+$json = $mydlpu_handle->getCurriculumWeeks($username, $semester, $current_week, $wechat_id);
 $curriculum_weeks = json_decode($json, 1);
 
 function a ($number)

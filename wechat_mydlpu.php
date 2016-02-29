@@ -12,6 +12,11 @@ $encodingAESKey                 = '9FfoDHT1URoPvrXlgzrgAkDc4jozKhNMOcSITFpoARI';
 
 $server = new Server($appId, $token, $encodingAESKey);
 
+// 监听关注事件
+$server->on('event', 'subscribe', function($event) {
+    return Message::make('text')->content('专为大连工大学子定制，简洁高效的查询成绩、课表和考试安排等信息');
+});
+
 // 监听所有类型
 //$server->on('message', function($message) {
 //    return Message::make('text')->content('In development');
@@ -149,7 +154,7 @@ $server->on('event', 'CLICK', function($event) {
     $userinfo = $mydlpu_handle->getSimpleUserinfoByWechat($event['FromUserName']);
     $username = $userinfo->_id;
 
-    $curriculum_weeks = json_decode($mydlpu_handle->getCurriculumWeeks($username, $current_semester, '1', $event['FromUserName']), 1);
+    $curriculum_weeks = json_decode($mydlpu_handle->getCurriculumWeeks($username, $current_semester, $current_week, $event['FromUserName']), 1);
     $score_semester = json_decode($mydlpu_handle->getScore($username, $event['FromUserName'], $previous_semester), 1);
     $exam_arrangement = json_decode($mydlpu_handle->getExamArrangement($username, $previous_semester, $event['FromUserName']), 1);
 
