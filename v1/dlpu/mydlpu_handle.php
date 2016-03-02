@@ -93,6 +93,19 @@ class mydlpu_handle {
         return $token;
     }
 
+    /**从学校教务处网站获取学生信息
+     * @param $username
+     * @param $password
+     * @return mixed
+     */
+    public function getUserinfoFormSchool ($username, $password)
+    {
+        $url = 'https://api.xu42.cn/v1/dlpu/userinfo/'.$username;
+        $headers = ['Authorization:' . $this->getToken(), 'password:' . $password];
+        return $this->myCurl($url, $headers);
+    }
+
+
     /**
      * 向api请求本周课程表信息
      * @param $username             登陆账号, 这里为学号
