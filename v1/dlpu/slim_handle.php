@@ -449,6 +449,7 @@ class slim_handle {
         return $this->getCurriculumTheoryFromSchool();
     }
 
+
     /**
      * 从学校服务器获取 我的课表->学期理论课表 并保存入库
      * @return mixed
@@ -587,4 +588,43 @@ class slim_handle {
         $res = (new rollcall_student())->bindingStudentClient($this->arguments['username'], $this->request->getHeaderLine('client'));
         return $this->writeResponseBody($res['data'], $res['messages']);
     }
+
+    /**
+     * 签到系统 教师获取点名详情
+     * @return mixed
+     */
+    public function rollcallGetDetail()
+    {
+        require_once 'rollcall_teacher.php';
+        $allPostPutVars = $this->request->getParsedBody();
+        $res = (new rollcall_teacher())->getRollCallDetail($allPostPutVars['teacher'], $allPostPutVars['semester'], $allPostPutVars['week'], $allPostPutVars['day'], $allPostPutVars['session']);
+        return $this->writeResponseBody($res['data'], $res['messages']);
+    }
+
+    /**
+     * 签到系统 教师端删除点名信息
+     * @return mixed
+     */
+    public function deleteRollCallDetail()
+    {
+        require_once 'rollcall_teacher.php';
+        $allPostPutVars = $this->request->getParsedBody();
+        $res = (new rollcall_teacher())->deleteRollCallDetail($allPostPutVars['teacher'], $allPostPutVars['semester'], $allPostPutVars['week'], $allPostPutVars['day'], $allPostPutVars['session'], $allPostPutVars['password']);
+        return $this->writeResponseBody($res['data'], $res['messages']);
+    }
+
+
+
+    /**
+     * 临时为张志安毕业设计写的一个接口
+     *
+     */
+    public function postNewDishes()
+    {
+        require 'zhangzhian.php';
+        $allPostPutVars = $this->request->getParsedBody();
+        $res = (new zhangzhian())->insertOne($allPostPutVars['people'], $allPostPutVars['desk'], $allPostPutVars['dishes'], $allPostPutVars['total']);
+        return $this->writeResponseBody($res['data'], $res['messages']);
+    }
+    
 }

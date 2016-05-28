@@ -29,7 +29,8 @@ $server->on('event', 'subscribe', function($event) {
 
 // 监听文本内容
 $server->on('message', 'text', function($message) {
-    if(substr($message['Content'],0,3) == 'cet' or substr($message['Content'],0,3) == 'CET'){
+    if(substr($message['Content'],0,3) == 'cet' or substr($message['Content'],0,3) == 'CET')
+    {
 //        return Message::make('text')->content("2016年2月26日上午9时发布");
         preg_match_all('/\d+/', $message['Content'], $number);
         $name = substr($message['Content'],3, -15);
@@ -42,6 +43,28 @@ $server->on('message', 'text', function($message) {
             $res = $cet_score['data']['0'] . ' : '. $cet_score['data']['1'] . "\n" . $cet_score['data']['10'] . ' : ' . $cet_score['data']['11']. "\n" . $cet_score['data']['12'] . ' : ' . $cet_score['data']['13']. "\n" . $cet_score['data']['14'] . ' : ' . $cet_score['data']['15']. "\n" . $cet_score['data']['16'] . ' : ' . $cet_score['data']['17'];
             return Message::make('text')->content($res);
         }
+    }
+
+    // 我的课程 网络安全
+    if($message['Content'] == '小飞飞')
+    {
+        return Message::make('text')->content('<a href="http://xu42.file.alimmdn.com/1460876500439.pdf">利用恶意代码入侵服务器</a>');
+    }
+
+    // 我的课程 网络安全
+    if($message['Content'] == '入侵软件')
+    {
+        return Message::make('text')->content('<a href="http://share.weiyun.com/805e1ce8fc20716e59437b44532b690e">利用恶意代码入侵服务器 - 软件下载</a>');
+    }
+
+    // 印乐签到脚本
+    if(substr($message['Content'],0,6) == '印乐')
+    {
+        require_once 'v1/dlpu/yinle_sign.php';
+        $phone = substr($message['Content'],6);
+        $yinle = new yinle();
+        $res = $yinle->index($phone);
+        return Message::make('text')->content($res);
     }
 });
 
@@ -60,6 +83,8 @@ $server->on('event', 'scancode_waitmsg', function($event) {
     $qrcode_req = base64_decode($qrcode_base64) . '|' . $username . '|' . time();   // 学生签到发送的数据
     $res_json = $mydlpu_handle->getStudentRollcallResult('wec'.base64_encode($qrcode_req));  // 加入3个无关字符，获取扫描结果
 
+    //return Message::make('text')->content('wec'.base64_encode($qrcode_req));
+    //return Message::make('text')->content("扫码得到的信息:".$qrcode_base64."\n"."学号信息:".$username."\n"."学生签到发送的数据:".$qrcode_req."\n"."入3个无关字符，获取扫描结果:".$res_json."\n");
     $response = '二维码错误, 签到失败';
     $res = json_decode($res_json, TRUE);
     if($res['data'] && $res['messages'] == 'OK'){
@@ -197,7 +222,7 @@ $server->on('event', 'CLICK', function($event) {
             return Message::make('image')->media_id('SjpYQYO6pktZABBZ86eoZid9z0aQZfDDfGmKqnEg-sLwcoDUR4imPbb2WXSAVt5u');
         case 'btn_score_semester':
             if(!getSimpleUserinfoByWechat($event['FromUserName'])) return $message_news_binding;  // 此微信账户 未绑定教务系统, 执行绑定
-            $score = '同学: ' . $username . "\n" . "最近学期的成绩如下\n\n";
+            $score = '同学: ' . $username . "\n" . "上学期的成绩如下\n\n";
 
             for($i=1; $i<count($score_semester['data']['1']);$i++)
             {

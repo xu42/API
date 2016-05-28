@@ -20,11 +20,8 @@ class student_login extends student_crawl_tools {
     private $username = '';
     private $password = '';
 
-    private $database_userinfo_name = 'dlpu_userinfo';
-    private $collection_password_name = 'password';
 
-
-    /**
+    /**z
      * student_login constructor.
      */
     public function __construct($username, $password)

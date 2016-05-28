@@ -14,7 +14,7 @@
     <div class="am-form-group">
         <label for="teacher_job_number" class="am-u-sm-2 am-form-label">工号</label>
         <div class="am-u-sm-10">
-            <input type="number" id="teacher_job_number" placeholder="请输入工号" required>
+            <input type="password" id="teacher_job_number" placeholder="请输入工号" required>
         </div>
     </div>
     <div class="am-form-group">

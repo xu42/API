@@ -42,7 +42,7 @@ class rollcall_student {
     {
         $qrcode_array = $this->translationQRdata($qrcode_data_student);
         $check_rollcall_record = $this->checkIsAlreadyRollcall($qrcode_array);
-        if($this->checkIsExpired($qrcode_array['6'])) return ['data' => '二维码已失效(请在一个小时之内完成扫码)', 'messages' => 'error'];
+        if($this->checkIsExpired($qrcode_array['6'])) return ['data' => '二维码已失效(请在30秒之内完成扫码)', 'messages' => 'error'];
         if($this->checkIsAlreadyRollcall($qrcode_array)) return ['data' => '本节课您已签到成功，请勿重复扫码签到', 'messages' => 'error'];
         (new rollcall_database_tools($this->database_dlpu_rollcall_name, $this->collection_dlpu_rollcall_student_record))->saveQRcodeData(['teacher' => $qrcode_array[0], 'room' => $qrcode_array[1], 'semester' => $qrcode_array[2], 'week' => $qrcode_array[3], 'day' => $qrcode_array[4], 'session' => $qrcode_array[5], 'granttime'=> $qrcode_array[6], 'student' => $qrcode_array[7], 'recordtime' =>$qrcode_array[8]]);
         return ['data' => $qrcode_array, 'messages' => 'OK'];
@@ -65,7 +65,8 @@ class rollcall_student {
      */
     public function checkIsExpired ($granttime)
     {
-        if($granttime + 3600 < time()) return TRUE;
+//        return TRUE;
+        if($granttime + 60 < time()) return TRUE;
         return FALSE;
     }
     

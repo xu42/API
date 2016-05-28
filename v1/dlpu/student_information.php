@@ -49,7 +49,7 @@ class student_information extends student_crawl_tools {
             $match_data_table_trim[] = str_replace('&nbsp;', '', $value);
         }
 
-        // 匹配出学号 $username[0]
+        // 匹配出学号 $username[0] 
         preg_match('/\d+/', $match_data_table_trim[6], $username);
 
         $save_photo = $this->savePhoto($username[0]);

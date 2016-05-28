@@ -69,14 +69,21 @@ class student_curriculum extends student_crawl_tools {
             $k = 0;
             for($j = 0; $j < count($theory[$i]);)
             {
-                if($theory[$i][$j] != "&nbsp;")
+                if($theory[$i][$j] != "&nbsp;" && $theory[$i][$j+3] != '----------------------')
                 {
                     $table[$i-1][$k][0] = $theory[$i][$j];
                     $table[$i-1][$k][1] = $theory[$i][$j+1];
                     $table[$i-1][$k][2] = $theory[$i][$j+2];
                     $table[$i-1][$k][3] = $theory[$i][$j+4];
                     $j+=7;
-                }else{
+                }elseif($theory[$i][$j+3] == '----------------------'){
+                    $table[$i-1][$k][0] = $theory[$i][$j].'/'.$theory[$i][$j+4];
+                    $table[$i-1][$k][1] = $theory[$i][$j+1].'/'.$theory[$i][$j+14];
+                    $table[$i-1][$k][2] = $theory[$i][$j+2].'/'.$theory[$i][$j+15];
+                    $table[$i-1][$k][3] = $theory[$i][$j+8].'/'.$theory[$i][$j+13];
+                    $j+=16;
+                }
+                else{
                     $j+=2;
                 }
                 $k+=1;

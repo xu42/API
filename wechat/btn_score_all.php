@@ -46,7 +46,6 @@ $score = json_decode($json, 1);
         {
             if(@$score['data']['1'][$i])
             {
-                // echo "<tr><td style='width: 26%;'>".$score['data']['1'][$i]['1']."</td>";
                 $course_title = $course_title_short = $score['data']['1'][$i]['3'];
                 if(strlen($course_title) > 33){
                     $course_title_short = substr($course_title, 0, 33) . '...';

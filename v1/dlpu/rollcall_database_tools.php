@@ -96,4 +96,40 @@ class rollcall_database_tools extends mongodb {
         $res_array = $res->toArray();
         return $res_array[0];
     }
+
+    /**
+     * 教师端，获取当前节次学生签到详情
+     * @param $teacher
+     * @param $semester
+     * @param $week
+     * @param $day
+     * @param $session
+     * @return mixed
+     */
+    public function getRollCallDetail ($teacher, $semester, $week, $day, $session)
+    {
+        $filter = ['teacher' => $teacher, 'semester' => $semester, 'week' => $week, 'day' => $day, 'session' => $session];
+
+        $res = $this->find($filter);
+        $res_array = $res->toArray();
+        return $res_array;
+    }
+
+    /**
+     * 删除某次签到信息
+     * @param $teacher
+     * @param $semester
+     * @param $week
+     * @param $day
+     * @param $session
+     * @return string
+     */
+    public function deleteRollCallDetail ($teacher, $semester, $week, $day, $session)
+    {
+        $filter = ['teacher' => $teacher, 'semester' => $semester, 'week' => $week, 'day' => $day, 'session' => $session];
+        $options = ['limit' => 0];
+
+        return $this->delete($filter, $options);
+    }
+
 }

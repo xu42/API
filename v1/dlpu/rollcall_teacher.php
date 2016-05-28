@@ -19,12 +19,13 @@ class rollcall_teacher {
     private $teacher_current_room_number;                                        // 请求二维码当前教室
     private $teacher_current_corese_number;                                      // 请求二维码当前授课课程编号
     private $teacher_current_time;                                               // 请求二维码当前时间
-    private $teacher_current_semester = '2015-2016-1';                           // 请求二维码当前学期
+    private $teacher_current_semester = '2015-2016-2';                           // 请求二维码当前学期
     private $teacher_current_session;                                            // 请求二维码当前节次
     private $database_dlpu_rollcall_name = 'dlpu_rollcall';                      // 签到系统数据库名
     private $collection_dlpu_rollcall_teacher_messages = 'teacher_messages';     // 教师信息集合(表)
     private $collection_dlpu_rollcall_qrcode_data = 'qrcode_data';               // 二维码数据集合(表)
     private $collection_dlpu_rollcall_qrcode = 'qrcode';                         // 生成的二维码信息集合(表)
+    private $collection_dlpu_rollcall_student_record = 'student_record';         // 学生签到记录(表)
 
 
     /**
@@ -66,6 +67,55 @@ class rollcall_teacher {
 
 
     /**
+     * 教师端，获取当前节次学生签到详情
+     * @param $teacher
+     * @param $session
+     * @return array|mixed
+     */
+    public function getRollCallDetail ($teacher, $semester, $week, $day, $session)
+    {
+        if(is_null($teacher) || is_null($semester) || is_null($week) || is_null($day) || is_null($session)) return ['data' => 'Missing parameter', 'messages' => 'error'];
+
+        $object_rollcall_database_tools = new rollcall_database_tools($this->database_dlpu_rollcall_name, $this->collection_dlpu_rollcall_student_record);
+        $res = $object_rollcall_database_tools->getRollCallDetail($teacher, $semester, $week, $day, $session);
+
+        $data['teacher'] = $teacher;
+        $data['semester'] = $semester;
+        $data['week'] = $week;
+        $data['day'] = $day;
+        $data['session'] = $session;
+        $data['count'] = count($res);
+        foreach($res as $value) $data['student'][] = $value->student;
+
+        return ['data' => $data, 'messages' => 'OK'];
+    }
+
+    /**
+     * 删除某次点名信息
+     * @param $teacher
+     * @param $semester
+     * @param $week
+     * @param $day
+     * @param $session
+     * @param $password
+     * @return array
+     */
+    public function deleteRollCallDetail ($teacher, $semester, $week, $day, $session, $password)
+    {
+        if(is_null($teacher) || is_null($semester) || is_null($week) || is_null($day) || is_null($session)) return ['data' => 'Missing parameter', 'messages' => 'error'];
+
+        $identity_verify_res = $this->verifyTeacherIdentity($teacher, $password);
+
+        if($identity_verify_res){
+            $object_rollcall_database_tools = new rollcall_database_tools($this->database_dlpu_rollcall_name, $this->collection_dlpu_rollcall_student_record);
+            $data = $object_rollcall_database_tools->deleteRollCallDetail($teacher, $semester, $week, $day, $session);
+            return ['data' => TRUE, 'messages' => 'OK'];
+        }else{
+            return ['data' => 'wrong job number or password', 'messages' => 'error'];
+        }
+    }
+
+    /**
      * 在请求二维码时 验证教师身份是否合法
      * @param $teacher_job_number
      * @param $teacher_password
@@ -87,4 +137,5 @@ class rollcall_teacher {
         $object_rollcall_database_tools = new rollcall_database_tools($this->database_dlpu_rollcall_name, $this->collection_dlpu_rollcall_qrcode_data);
         return $object_rollcall_database_tools->saveQRcodeData($qrcode_data);
     }
+
 }

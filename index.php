@@ -24,7 +24,7 @@ $app->add(new JwtAuthentication([
     "rules" => [
         new JwtAuthentication\RequestPathRule([
             "path" => '/',
-            "passthrough" => ["/v1/token", "/v1/dlpu/rollcall_getqr", "/v1/dlpu/rollcall_rc", "/v1/dlpu/rollcall_stu_binding/"]
+            "passthrough" => ["/v1/token", "/v1/dlpu/rollcall_getqr", "/v1/dlpu/rollcall_rc", "/v1/dlpu/rollcall_stu_binding/", "/v1/dlpu/rollcall_detail", "/v1/dlpu/rollcall_delete", "/v1/dishes", "/v1/yinle/sign"]
         ])
     ],
     "callback" => function(ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($app) {
@@ -434,6 +434,63 @@ $app->post('/v1/dlpu/rollcall_rc', function(ServerRequestInterface $request, Res
 $app->post('/v1/dlpu/rollcall_stu_binding/{username}', function(ServerRequestInterface $request, ResponseInterface $response, $arguments) {
     require_once 'v1/dlpu/slim_handle.php';
     return (new slim_handle($request, $response, $arguments))->rollcallBindingStudentClient();
+});
+
+/**
+ * 签到系统 教师获取点名详情
+ * ===============================================
+ * POST                   /v1/dlpu/rollcall_detail
+ *
+ * FORM-DATA
+ *      teacher         教师工号
+ *      semester        学期
+ *      week            周次
+ *      day             周几
+ *      session         节次
+ */
+$app->post('/v1/dlpu/rollcall_detail', function(ServerRequestInterface $request, ResponseInterface $response, $arguments) {
+    require_once 'v1/dlpu/slim_handle.php';
+    return (new slim_handle($request, $response, $arguments))->rollcallGetDetail();
+});
+
+
+/**
+ * 签到系统 教师端删除点名信息
+ * ===============================================
+ * POST                   /v1/dlpu/rollcall_delete
+ *
+ * FORM-DATA
+ *      teacher         教师工号
+ *      semester        学期
+ *      week            周次
+ *      day             周几
+ *      session         节次
+ *      password        教师密码
+ */
+$app->post('/v1/dlpu/rollcall_delete', function(ServerRequestInterface $request, ResponseInterface $response, $arguments) {
+    require_once 'v1/dlpu/slim_handle.php';
+    return (new slim_handle($request, $response, $arguments))->deleteRollCallDetail();
+});
+
+
+/**
+ * 临时为张志安毕业设计写的一个接口
+ *
+ */
+$app->post('/v1/dishes', function(ServerRequestInterface $request, ResponseInterface $response, $arguments) {
+    require_once 'v1/dlpu/slim_handle.php';
+    return (new slim_handle($request, $response, $arguments))->postNewDishes();
+});
+
+
+/**
+ * 印乐签到脚本
+ */
+$app->get('/v1/yinle/sign', function(ServerRequestInterface $request, ResponseInterface $response, $arguments) {
+    require_once 'v1/dlpu/yinle_sign.php';
+    $yinle = new yinle();
+    $res = $yinle->yinleSign();
+    return $response->getBody()->write(json_encode($res));
 });
 
 $app->run();

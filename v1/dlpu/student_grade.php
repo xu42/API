@@ -56,7 +56,7 @@ class student_grade extends student_crawl_tools {
     protected function re($res_data)
     {
         preg_match_all('/<span>(\d+?)(<|。<)/', $res_data, $credit);
-        if(count($credit[0]) == 0) return FALSE; // 未获取到成绩列表(通过判断是否获取到绩点信息)
+//        if(count($credit[0]) == 0) return FALSE; // 未获取到成绩列表(通过判断是否获取到绩点信息)
         for($i=0;$i<count($credit[1]);$i++){
             $this->courseGrade[0][$i+1] = $credit[1][$i];
         }
