@@ -180,8 +180,8 @@ $server->on('event', 'CLICK', function($event) {
     $username = $userinfo->_id;
 
     $curriculum_weeks = json_decode($mydlpu_handle->getCurriculumWeeks($username, $current_semester, $current_week, $event['FromUserName']), 1);
-    $score_semester = json_decode($mydlpu_handle->getScore($username, $event['FromUserName'], $previous_semester), 1);
-    $exam_arrangement = json_decode($mydlpu_handle->getExamArrangement($username, $previous_semester, $event['FromUserName']), 1);
+    $score_semester = json_decode($mydlpu_handle->getScore($username, $event['FromUserName'], $current_semester), 1);
+    $exam_arrangement = json_decode($mydlpu_handle->getExamArrangement($username, $current_semester, $event['FromUserName']), 1);
 
     switch($event['EventKey'])
     {
@@ -222,7 +222,7 @@ $server->on('event', 'CLICK', function($event) {
             return Message::make('image')->media_id('SjpYQYO6pktZABBZ86eoZid9z0aQZfDDfGmKqnEg-sLwcoDUR4imPbb2WXSAVt5u');
         case 'btn_score_semester':
             if(!getSimpleUserinfoByWechat($event['FromUserName'])) return $message_news_binding;  // 此微信账户 未绑定教务系统, 执行绑定
-            $score = '同学: ' . $username . "\n" . "上学期的成绩如下\n\n";
+            $score = '同学: ' . $username . "\n" . "本学期的成绩如下\n\n";
 
             for($i=1; $i<count($score_semester['data']['1']);$i++)
             {

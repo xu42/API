@@ -167,6 +167,7 @@ class mydlpu_handle {
     {
         $url = 'https://api.xu42.cn/v1/dlpu/usergrade/'.$username.'/'.$semester;
         $headers = ['Authorization:' . $this->getToken(), 'wechat:' . $wechat_id];
+        $headers = ['Authorization:' . $this->getToken(), 'wechat:' . $wechat_id, 'latest:yes'];
         return $this->myCurl($url, $headers);
     }
 
@@ -178,10 +179,11 @@ class mydlpu_handle {
      * @param string $category  考试安排分类信息 考试类别，1 => 期初, 2 => 期中, 3 => 期末
      * @return mixed
      */
-    public function getExamArrangement ($username, $semester, $wechat_id, $category = '3')
+    public function getExamArrangement ($username, $semester, $wechat_id, $category = '')
     {
         $url = 'https://api.xu42.cn/v1/dlpu/exam_arrangement/'.$username.'/'.$semester.'/'.$category;
         $headers = ['Authorization:' . $this->getToken(), 'wechat:' . $wechat_id];
+        $headers = ['Authorization:' . $this->getToken(), 'wechat:' . $wechat_id, 'latest:yes'];
         return $this->myCurl($url, $headers);
     }
 
